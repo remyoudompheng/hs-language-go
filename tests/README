@@ -1,0 +1,72 @@
+Here are some example tests, to run them:
+
+  $ test-lexer  test##.go
+  $ test-parser test##.go
+
+--- Guidelines
+
+1xxx-Literal = Literal-1xxx
+
+20xx-Declaration = TopLevelDecl/ConstDecl
+21xx-Declaration = TopLevelDecl/TypeDecl
+22xx-Declaration = TopLevelDecl/VarDecl
+23xx-Declaration = TopLevelDecl/FunctionDecl
+24xx-Declaration = TopLevelDecl/MethodDecl
+25xx-Declaration = ImportDecl
+
+30xx-Expression UnaryExpr/PrimaryExpr/Operand
+31xx-Expression UnaryExpr/PrimaryExpr/Operand/QualifiedIdent[0] id
+32xx-Expression UnaryExpr/PrimaryExpr/Operand/QualifiedIdent[1] id . id
+33xx-Expression UnaryExpr/PrimaryExpr/Operand/MethodExpr[0]     id . id
+34xx-Expression UnaryExpr/PrimaryExpr/Operand/MethodExpr[1]     ( * id ) . id
+35xx-Expression UnaryExpr/PrimaryExpr/Operand/(Expression)      ( expr )
+40xx-Expression UnaryExpr/PrimaryExpr/Conversion                type ( expr )
+41xx-Expression UnaryExpr/PrimaryExpr/BuiltinCall               
+42xx-Expression UnaryExpr/PrimaryExpr/BuiltinCall/new           'new'  ( type ... )
+43xx-Expression UnaryExpr/PrimaryExpr/BuiltinCall/make          'make' ( type ... )
+44xx-Expression UnaryExpr/PrimaryExpr/Selector                  prim . id
+45xx-Expression UnaryExpr/PrimaryExpr/Index                     prim [ expr ]
+46xx-Expression UnaryExpr/PrimaryExpr/Slice                     prim [ expr : expr ]
+47xx-Expression UnaryExpr/PrimaryExpr/TypeAssertion             prim . ( type )
+48xx-Expression UnaryExpr/PrimaryExpr/Call                      prim ( ... )
+49xx-Expression UnaryExpr/PrimaryExpr/Call/...                  prim ( ... '...' )
+50xx-Expression UnaryExpr/unary_op/+
+51xx-Expression UnaryExpr/unary_op/-
+52xx-Expression UnaryExpr/unary_op/!
+53xx-Expression UnaryExpr/unary_op/^
+54xx-Expression UnaryExpr/unary_op/*
+55xx-Expression UnaryExpr/unary_op/&
+56xx-Expression UnaryExpr/unary_op/<-
+57xx-Expression UnaryExpr/unary_op/<-
+60xx-Expression BinaryExpr/binary_op/||
+61xx-Expression BinaryExpr/binary_op/&&
+62xx-Expression BinaryExpr/binary_op/<-
+63xx-Expression BinaryExpr/binary_op/==
+64xx-Expression BinaryExpr/binary_op/!=
+65xx-Expression BinaryExpr/binary_op/<
+66xx-Expression BinaryExpr/binary_op/<=
+67xx-Expression BinaryExpr/binary_op/>
+68xx-Expression BinaryExpr/binary_op/>=
+69xx-Expression BinaryExpr/binary_op/+
+70xx-Expression BinaryExpr/binary_op/-
+71xx-Expression BinaryExpr/binary_op/|
+72xx-Expression BinaryExpr/binary_op/^
+73xx-Expression BinaryExpr/binary_op/*
+74xx-Expression BinaryExpr/binary_op//
+75xx-Expression BinaryExpr/binary_op/%
+76xx-Expression BinaryExpr/binary_op/<<
+77xx-Expression BinaryExpr/binary_op/>>
+78xx-Expression BinaryExpr/binary_op/&
+79xx-Expression BinaryExpr/binary_op/&^
+
+80xx-Statement ConstDecl
+81xx-Statement TypeDecl
+82xx-Statement VarDecl
+83xx-Statement LabeledStmt
+84xx-Statement SimpleStmt/EmptyStmt
+85xx-Statement SimpleStmt/ExpressionStmt
+86xx-Statement SimpleStmt/IncDecStmt/++
+87xx-Statement SimpleStmt/IncDecStmt/--
+88xx-Statement SimpleStmt/Assignment
+89xx-Statement SimpleStmt/ShortVarDecl
+

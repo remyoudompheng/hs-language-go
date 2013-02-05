@@ -1,0 +1,119 @@
+---
+The Go specification at <http://golang.org/doc/go_spec.html> (hereafter called the "spec"),
+does not include section numbers, and since we refer to sections quite frequently, it seemed
+like a good idea to add them. The spec is also versioned with a date, this numbering refers
+to the spec from "February 1, 2011" unless stated otherwise. Since the spec is not frozen,
+it may be subject to changes, including, but not limited to insertion of sections.
+
+1. Introduction
+2. Notation
+3. Source code representation
+   3.1. Characters
+   3.2. Letters and digits
+4. Lexical elements
+   4.1. Comments
+   4.2. Tokens
+   4.3. Semicolons
+   4.4. Identifiers
+   4.5. Keywords
+   4.6. Operators and Delimiters
+   4.7. Integer literals
+   4.8. Floating-point literals
+   4.9. Imaginary literals
+   4.10. Character literals
+   4.11. String literals
+5. Constants
+6. Types
+   6.1. Boolean types
+   6.2. Numeric types
+   6.3. String types
+   6.4. Array types
+   6.5. Slice types
+   6.6. Struct types
+   6.7. Pointer types
+   6.8. Function types
+   6.9. Interface types
+   6.10. Map types
+   6.11. Channel types
+7. Properties of types and values
+   7.1. Type identity
+   7.2. Assignability
+8. Blocks
+9. Declarations and scope
+   9.1. Label scopes
+   9.2. Predeclared identifiers
+   9.3. Exported identifiers
+   9.4. Blank identifier
+   9.5. Constant declarations
+   9.6. Iota
+   9.7. Type declarations
+   9.8. Variable declarations
+   9.9. Short variable declarations
+   9.10. Function declarations
+   9.11. Method declarations
+10. Expressions
+    10.1. Operands
+    10.2. Qualified identifiers
+    10.3. Composite literals
+    10.4. Function literals
+    10.5. Primary expressions
+    10.6. Selectors
+    10.7. Indexes
+    10.8. Slices
+    10.9. Type assertions
+    10.10. Calls
+    10.11. Passing arguments to ... parameters
+    10.12. Operators
+           10.12.1. Operator precedence
+           10.12.2. Arithmetic operators
+           10.12.3. Integer overflow
+           10.12.4. Comparison operators
+           10.12.5. Logical operators
+           10.12.6. Address operators
+           10.12.7. Receive operator (formerly known as "Communication operators")
+    10.13. Method expressions
+    10.14. Conversions
+    10.15. Constant expressions
+    10.16. Order of evaluation
+11. Statements
+    11.1. Empty statements
+    11.2. Labeled statements
+    11.3. Expression statements
+    11.4. Send statements (NEW)
+    11.5. IncDec statements
+    11.6. Assignments
+    11.7. If statements
+    11.8. Switch statements
+          11.8.1. Expression switches
+          11.8.2. Type switches
+    11.9. For statements
+    11.10. Go statements
+    11.11. Select statements
+    11.12. Return statements
+    11.13. Break statements
+    11.14. Continue statements
+    11.15. Goto statements
+    11.16. Fallthrough statements
+    11.17. Defer statements
+12. Built-in functions
+    12.1. Close and closed
+    12.2. Length and capacity
+    12.3. Allocation
+    12.4. Making slices, maps and channels
+    12.5. Appending to and copying slices
+    12.6. Assembling and disassembling complex numbers
+    12.7. Handling panics
+    12.8. Bootstrapping
+13. Packages
+    13.1. Source file organization
+    13.2. Package clause
+    13.3. Import declarations
+    13.4. An example package
+14. Program initialization and execution
+    14.1. The zero value
+    14.2. Program execution
+15. Run-time panics
+16. System considerations
+    16.1. Package unsafe
+    16.2. Size and alignment guarantees
+Implementation differences - TODO
