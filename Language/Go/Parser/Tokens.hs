@@ -112,16 +112,6 @@ data GoToken = GoTokNone
 tokenSimplify :: (Int, Int) -> String -> String
 tokenSimplify (n, m) s = map (s!!) [n..(length s)-m-1]
 
-tokenFromId :: String -> GoToken
-tokenFromId s = GoTokId $ if s!!0 == '#' && s!!1 == '['
-                          then tokenSimplify (2, 1) s
-                          else s
-
-tokenFromOp :: String -> GoToken
-tokenFromOp s = GoTokOp $ if s!!0 == '#' && s!!1 == '{'
-                          then tokenSimplify (2, 1) s
-                          else s
-
 -- False=singleline True=multiline
 tokenFromComment :: Bool -> String -> GoToken
 tokenFromComment False s = GoTokComment False $ tokenSimplify (2, 1) s

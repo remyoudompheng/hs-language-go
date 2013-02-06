@@ -11,8 +11,8 @@ import Text.Parsec.Pos
 -- SS. 3.1. Characters
 @unicode_char   = [\x00-\x7F]|[\x80-\xFF]+
 @unicode_nobr   = [\x00-\x5C\x5E-\x7F]|[\x80-\xFF]+
-@unicode_nobq   = [\x00-\x5F\x61-\x7F]|[\x80-\xFF]+
-@unicode_nodq   = [\x00-\x21\x23-\x7F]|[\x80-\xFF]+
+@unicode_nobq   = $printable # '`'
+@unicode_nodq   = $printable # \"
 @unicode_letter = [A-Za-z] -- should be [\p{L}]
 @unicode_digit  = [0-9]    -- should be [\p{N}]
 
@@ -35,11 +35,10 @@ $whitespace = [\ \t\f\v\r]
 $whiteline  = [\n]
 
 -- SS. 4.4. Identifiers
-@ident7bit  = @letter(@letter|@unicode_digit)*
-@identifier = (@ident7bit)|\#\[(@unicode_nobr)+\]
+@identifier = @letter(@letter|@unicode_digit)*
 
 -- SS. 4.6. Operators and Delimiters
-@operator   = ($punctuation)+|\#\{(@unicode_nobr)+\}
+@operator   = $punctuation+
 
 -- SS. 4.7. Integer literals
 @decimallit = [1-9]($decimal_digit)*
@@ -103,7 +102,7 @@ tokens :-
   ","             { \p s -> posify p $ GoTokComma }
   "."             { \p s -> posify p $ GoTokFullStop }
   "..."           { \p s -> posify p $ GoTokElipsis }
-  "_"             { \p s -> posify p $ tokenFromId "_" }
+  "_"             { \p s -> posify p $ GoTokId "_" }
 
 -- BEGIN operators
   "||"            { \p s -> posify p $ GoTokLOR }
@@ -130,7 +129,7 @@ tokens :-
   "--"            { \p s -> posify p $ GoTokDec }
   "++"            { \p s -> posify p $ GoTokInc }
 -- END operators
-  @operator       { \p s -> posify p $ tokenFromOp s }
+  @operator       { \p s -> posify p $ GoTokOp s }
 
 -- BEGIN keywords
   break           { \p s -> posify p $ GoTokBreak }
@@ -159,7 +158,7 @@ tokens :-
   type            { \p s -> posify p $ GoTokType }
   var             { \p s -> posify p $ GoTokVar }
 -- END keywords
-  @identifier     { \p s -> posify p $ tokenFromId s }
+  @identifier     { \p s -> posify p $ GoTokId s }
 
 {
 posAlex2Parsec :: String -> AlexPosn -> SourcePos
