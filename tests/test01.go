@@ -12,11 +12,11 @@ comment
 
 //single-line comment
 
-func #[fraçais]() {
+func français() {
     return 0;
 };
 
-func #[今日は]() {
+func 今日は() {
     return 0;
 };
 

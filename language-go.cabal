@@ -71,3 +71,15 @@ Library
 --  HS-Source-Dirs: tests/
 --  Main-is: test-parser.hs
 
+executable tests
+    main-is:    tests.hs
+    -- ghc-options: -Wall
+
+    Build-Depends:
+        base == 4.*,
+        array >= 0,
+        parsec >= 3,
+        HUnit
+
+    Other-Modules:
+        Language.Go.Parser.Lexer
