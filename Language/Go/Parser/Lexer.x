@@ -3,7 +3,6 @@
 -- Module: Language.Go.Parser.Lexer
 module Language.Go.Parser.Lexer where
 import Language.Go.Parser.Tokens
-import Codec.Binary.UTF8.String
 import Text.Parsec.Pos
 }
 

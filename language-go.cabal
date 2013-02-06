@@ -1,5 +1,5 @@
 Cabal-Version: >= 1.8
-Version:       0.8
+Version:       0.9
 Name:          language-go
 Author:        Andrew Robbins
 Maintainer:    and_j_rob@yahoo.com
@@ -49,7 +49,7 @@ Extra-source-files:
 
 Library
   Build-Depends:
-    base >= 3 && < 4,
+    base == 4.*,
     array >= 0,
     parsec >= 3,
     utf8-string >= 0
