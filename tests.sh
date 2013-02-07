@@ -1,8 +1,7 @@
 #!/bin/bash
 
 #DIR="tests"
-#DIR="tests/go/src/pkg/go"
-DIR="tests/go/src/cmd"
+DIR=$GOROOT/src/pkg/go
 
 function dotest {
 tests/test-lexer  "$1"
@@ -17,8 +16,8 @@ tests/test-parser "$1"
 #    fi
 #done
 
-for TEST in $(find ${DIR} -name '*\.go') ; do
-    if dotest "$TEST" | tee "${TEST%.go}".log | grep ERROR ; then
+for TEST in tests/*.go $(find ${DIR} -name '*\.go' "!" -path "*/testdata/*") ; do
+    if dotest "$TEST" | grep -A 2 ^ERROR ; then
         echo "FAIL: $TEST"
     else
         echo "PASS: $TEST"

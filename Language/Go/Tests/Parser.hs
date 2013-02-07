@@ -39,6 +39,14 @@ testSwitch1 = testParse "test switch with empty case"
         GoDefault [GoStmtReturn []]
       ]
 
+testSelect1 = testParse "test empty select"
+    goStatement "select {}" $
+    GoStmtSelect []
+
+testSelect2 = testParse "test select with empty case"
+    goStatement "select { case <-ch: }" $
+    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "ch"))))] []]
+
 testLiteral1 = testParse "empty composite literal"
     goCompositeLit "T{}" $
     GoLitComp (GoTypeName [] (GoId "T")) (GoComp [])
@@ -64,6 +72,8 @@ testsParser =
   , testBuiltin2
   , testConversion1
   , testSwitch1
+  , testSelect1
+  , testSelect2
   , testLiteral1
   , testLiteral2
   , testLiteral3

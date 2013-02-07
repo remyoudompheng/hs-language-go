@@ -942,7 +942,7 @@ goGoStmt = do goTokGo; liftM GoStmtGo goExpression
 goSelectStmt :: GoParser GoStmt
 goSelectStmt = do
   goTokSelect
-  cl <- goBrace $ many1 goCommClause
+  cl <- goBrace $ many goCommClause
   return $ GoStmtSelect cl
 
 -- | Standard @CommClause@
@@ -951,7 +951,7 @@ goSelectStmt = do
 goCommClause :: GoParser (GoCase GoChan)
 goCommClause = do
   fn <- goAfter goTokColon goCommCase
-  st <- many1 $ goSemi goStatement
+  st <- many $ goSemi goStatement
   return $ fn st
 
 -- | Standard @CommCase@
