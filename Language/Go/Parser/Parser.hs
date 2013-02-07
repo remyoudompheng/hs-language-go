@@ -499,18 +499,15 @@ goLiteralType =  (try goArrayType)
              <|> goTypeName
 
 -- | Standard @LiteralValue@
+--   Standard @ElementList@
 --
 -- See also: SS. 10.3. Composite literals
 goLiteralValue :: GoParser GoComp
-goLiteralValue = liftM GoComp $ goBrace goElementList
-
--- | Standard @ElementList@
---
--- See also: SS. 10.3. Composite literals
-goElementList :: GoParser [GoElement]
-goElementList = try goElementList' <|> goElementList''
-goElementList' = endBy1 goElement goTokComma
-goElementList'' = sepBy1 goElement goTokComma
+goLiteralValue = do
+  goTokLBrace
+  elements <- sepEndBy (try goElement) goTokComma
+  goTokRBrace
+  return $ GoComp elements
 
 -- | Standard @Element@
 --
