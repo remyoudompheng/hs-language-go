@@ -22,7 +22,7 @@ $decimal_digit  = [0-9]
 $octal_digit    = [0-7]
 $hex_digit      = [0-9A-Fa-f]
 $sign           = [\+\-]
-$punctuation    = [\!\@\#\$\%\^\&\*\-\+=\<\>\,\.\:\;\|\\\/\?\~]
+$punctuation    = [\!\@\#\$\%\^\&\*\-\+=\<\>\,\.\:\|\\\/\?\~]
 
 -- SS. 4.1. Comments
 @ol_char    = [^\n]
