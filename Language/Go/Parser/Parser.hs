@@ -574,27 +574,19 @@ goPrimaryExpr = liftM GoPrim goPrimary
 
 -- | Nonstandard primary expressions (self-contained)
 goPrimary :: GoParser GoPrim
-goPrimary = goPrimary' >>= goPrimary''' where
-
-    -- THANK YOU ski ...
-    goPrimary''' :: GoPrim -> GoParser GoPrim
-    goPrimary''' ex = (goPrimary'' ex >>= goPrimary''') <|> return ex
-    
-    -- this is the right-associative parts of 'PrimaryExpr'
-    goPrimary'' :: GoPrim -> GoParser GoPrim
-    goPrimary'' ex =  (try $ goIndex ex)
-                  <|> (try $ goSlice ex)
-                  <|> goTypeAssertion ex
-                  <|> goCall ex
-    --            <|> goSelector ex -- how to distinguish from qualified identifiers?
-    --            <?> "primary expression component"
-    
-    -- this is the beginning parts of 'PrimaryExpr'
-    goPrimary' :: GoParser GoPrim
-    goPrimary' =  (try goOperand)
-              <|> (try goBuiltinCall)
---              <|> (try goConversion)
-    --        <?> "primary expression start"
+goPrimary = do
+    -- Try builtin call first because the prefix looks like an
+    -- identifier.
+    ex <- (try goBuiltinCall) <|> (try goOperand)
+    let complex prefix = (try $ goIndex prefix)
+                  <|> (try $ goSlice prefix)
+                  <|> goTypeAssertion prefix
+                  <|> goCall prefix
+                  <|> goSelector prefix
+    let veryComplex prefix = (do
+        ex <- complex prefix
+        veryComplex ex) <|> return ex
+    veryComplex ex
 
 -- | Standard @Selector@
 --
