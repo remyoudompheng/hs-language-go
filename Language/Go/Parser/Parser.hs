@@ -9,7 +9,6 @@
 module Language.Go.Parser.Parser where
 import Language.Go.Parser.Operators
 import Language.Go.Parser.Tokens
-import Language.Go.Parser.Tokens (GoTokenPos(..))
 import Language.Go.Parser.Lexer (alexScanTokens)
 import Language.Go.Syntax.AST
 
@@ -18,7 +17,6 @@ import Data.Maybe (isJust)
 import Text.Parsec.Prim hiding (token)
 import Text.Parsec.Error (ParseError)
 import Text.Parsec.Combinator
-import Data.Function
 
 
 -- | Tokenize Go language source code

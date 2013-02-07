@@ -48,6 +48,12 @@ Extra-source-files:
   tests.sh
 
 Library
+  ghc-options:
+    -fwarn-incomplete-patterns
+    -fwarn-dodgy-exports
+    -fwarn-dodgy-imports
+    -fwarn-unused-imports
+
   Build-Depends:
     base == 4.*,
     array >= 0,

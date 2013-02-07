@@ -5,14 +5,12 @@
 --
 -- x
 module Language.Go.Parser.Tokens where
-import Language.Go.Syntax.AST (GoSource)
 import Language.Go.Syntax.AST
 import Text.Parsec.String
 import Text.Parsec.Prim hiding (token)
 import qualified Text.Parsec.Prim as Prim
-import Text.Parsec.Pos (SourcePos(..))
+import Text.Parsec.Pos (SourcePos)
 import Text.Parsec.Combinator
-import Control.Applicative
 
 -- | GoTokener is the type used for all tokenizers
 -- type GoTokener = GenParser Char () [GoToken]

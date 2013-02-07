@@ -6,6 +6,7 @@
 -- This module contains *synthesis* functions that take an abstract syntax tree (AST),
 -- and output Go source code. For more information, see one of the submodules.
 
-module Language.Go.Syntax where
+module Language.Go.Syntax (
+  module Language.Go.Syntax.AST
+) where
 import Language.Go.Syntax.AST
---import Language.Go.Syntax.Pretty
