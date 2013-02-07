@@ -194,30 +194,17 @@ appendSemi tokens = tokens ++ semi where
 
 insertSemi :: [GoTokenPos] -> [GoTokenPos]
 insertSemi = stripAuto . stripNone . 
-             insertAfter . stripNone . insertBefore . 
              insertAfter . stripNone . appendSemi 
 
 --insertSemi = insertAfter . stripNone . insertBefore . appendSemi
 
 insertAfter :: [GoTokenPos] -> [GoTokenPos]
 insertAfter [] = []
-insertAfter ((xt@(GoTokenPos xp x)):[]) = (xt:[])
+insertAfter (xt:[]) = xt:[]
 insertAfter ((xt@(GoTokenPos _ x)):(yt@(GoTokenPos yp y)):zs) = xt:(insertAfter ((repl y):zs))
     where cond = if needSemi x then GoTokSemicolon else GoTokNone
           repl GoTokSemicolonAuto = GoTokenPos yp cond
           repl _ = yt
-
-insertBefore :: [GoTokenPos] -> [GoTokenPos]
-insertBefore [] = []
-insertBefore ((xt@(GoTokenPos xp x)):[]) = xt:[]
-insertBefore ((xt@(GoTokenPos xp x)):(yt@(GoTokenPos yp y)):zs) = out
-    where repl (GoTokRBrace) (GoTokSemicolon) = GoTokenPos xp GoTokSemicolonAuto
-          repl (GoTokRBrace) (GoTokElse) = GoTokenPos xp GoTokSemicolonAuto
---          repl (GoTokRParen) (GoTokSemicolon) = GoTokenPos xp GoTokSemicolonAuto
-          repl _ _ = GoTokenPos xp GoTokNone
-          out = ((repl x y):xt:(insertBefore (yt:zs)))
-
-
 
 -- token parsers
 
