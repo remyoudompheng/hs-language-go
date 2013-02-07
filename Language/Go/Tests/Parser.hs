@@ -67,6 +67,14 @@ testLiteral3 = testParse "composite literal in statement"
         (GoComp [GoElement (GoKeyField (GoId "Field")) (GoValueExpr (GoPrim (GoQual [] (GoId "value"))))])
       ))]
 
+testMethod1 = testParse "method call"
+    goExpression "time.Now()" $
+    GoPrim $ GoCall (GoQual [GoId "time"] (GoId "Now")) [] False
+
+testSelector1 = testParse "selector on index expression"
+    goExpression "a[i].field" $
+    GoPrim (GoSelect (GoIndex (GoQual [] (GoId "a")) (GoPrim (GoQual [] (GoId "i")))) (GoId "field"))
+
 testsParser =
   [ testBuiltin1
   , testBuiltin2
@@ -77,4 +85,6 @@ testsParser =
   , testLiteral1
   , testLiteral2
   , testLiteral3
+  , testMethod1
+  , testSelector1
   ]

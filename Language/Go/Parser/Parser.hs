@@ -577,12 +577,12 @@ goPrimary = do
     ex <- (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
     let complex prefix = (try $ goIndex prefix)
                   <|> (try $ goSlice prefix)
-                  <|> goTypeAssertion prefix
+                  <|> try (goTypeAssertion prefix)
                   <|> goCall prefix
                   <|> goSelector prefix
-    let veryComplex prefix = (do
-        ex <- complex prefix
-        veryComplex ex) <|> return ex
+    let veryComplex prefix = try (do
+        vex <- complex prefix
+        veryComplex vex) <|> return prefix
     veryComplex ex
 
 -- | Standard @Selector@
