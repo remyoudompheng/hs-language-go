@@ -25,4 +25,16 @@ testBuiltin2 = testParse "test builtin make as expr"
     goExpression "make([]int, 4)" $
     GoPrim (GoMake (GoSliceType (GoTypeName [] (GoId "int"))) [GoPrim (GoLiteral (GoLitInt "4" 4))])
 
-testsParser = [testBuiltin1, testBuiltin2]
+testSwitch1 = testParse "test switch with empty case"
+    goStatement "switch x { case 1: case 2: default: return; }" $
+    GoStmtSwitch
+      (GoCond Nothing (Just (GoPrim (GoQual [] (GoId "x")))))
+      [ GoCase [GoPrim (GoLiteral (GoLitInt "1" 1))] []
+      , GoCase [GoPrim (GoLiteral (GoLitInt "2" 2))] [],
+        GoDefault [GoStmtReturn []]
+      ]
+
+testsParser = [
+  testBuiltin1, testBuiltin2,
+  testSwitch1
+  ]

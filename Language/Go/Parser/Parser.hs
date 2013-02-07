@@ -848,7 +848,7 @@ goExprSwitchStmt = do
 goExprCaseClause :: GoParser (GoCase GoExpr)
 goExprCaseClause = do
   fn <- goAfter goTokColon goExprSwitchCase
-  st <- many1 $ goSemi goStatement
+  st <- many $ goSemi goStatement
   return $ fn st
 
 -- | Standard @ExprSwitchCase@
