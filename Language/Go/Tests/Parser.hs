@@ -26,6 +26,10 @@ testBuiltin2 = testParse "test builtin make as expr"
     goExpression "make([]int, 4)" $
     GoPrim (GoMake (GoSliceType (GoTypeName [] (GoId "int"))) [GoPrim (GoLiteral (GoLitInt "4" 4))])
 
+testConversion1 = testParse "byte slice conversion"
+    goExpression "[]byte(\"hello world\")" $
+    GoPrim $ GoCast (GoSliceType (GoTypeName [] (GoId "byte"))) (GoPrim $ GoLiteral $ GoLitStr "\"hello world\"" "hello world")
+
 testSwitch1 = testParse "test switch with empty case"
     goStatement "switch x { case 1: case 2: default: return; }" $
     GoStmtSwitch
@@ -58,6 +62,7 @@ testLiteral3 = testParse "composite literal in statement"
 testsParser =
   [ testBuiltin1
   , testBuiltin2
+  , testConversion1
   , testSwitch1
   , testLiteral1
   , testLiteral2

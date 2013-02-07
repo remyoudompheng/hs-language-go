@@ -572,7 +572,9 @@ goPrimary :: GoParser GoPrim
 goPrimary = do
     -- Try builtin call first because the prefix looks like an
     -- identifier.
-    ex <- (try goBuiltinCall) <|> (try goOperand)
+    -- goConversion only matches for unnamed types (names match
+    -- goOperand).
+    ex <- (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
     let complex prefix = (try $ goIndex prefix)
                   <|> (try $ goSlice prefix)
                   <|> goTypeAssertion prefix
