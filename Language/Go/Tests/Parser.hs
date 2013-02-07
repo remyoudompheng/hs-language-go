@@ -71,6 +71,14 @@ testMethod1 = testParse "method call"
     goExpression "time.Now()" $
     GoPrim $ GoCall (GoQual [GoId "time"] (GoId "Now")) [] False
 
+testMethod2 = testParse "method signature with anonymous receiver"
+    goMethodDecl "func (T) Method ()" $
+    GoMeth $ GoMethDecl
+      (GoRec False Nothing $ GoTypeName [] (GoId "T"))
+      (GoId "Method")
+      (GoSig [] [])
+      GoNoBlock
+
 testSelector1 = testParse "selector on index expression"
     goExpression "a[i].field" $
     GoPrim (GoSelect (GoIndex (GoQual [] (GoId "a")) (GoPrim (GoQual [] (GoId "i")))) (GoId "field"))
@@ -93,6 +101,7 @@ testsParser =
   , testLiteral2
   , testLiteral3
   , testMethod1
+  , testMethod2
   , testSelector1
   , testStructDecl1
   ]

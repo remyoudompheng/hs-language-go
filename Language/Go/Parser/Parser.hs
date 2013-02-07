@@ -419,12 +419,17 @@ goMethodDecl = do
 --
 -- See also: SS. 9.11. Method declarations
 goReceiver :: GoParser GoRec
-goReceiver = between goTokLParen goTokRParen recspec
-    where recspec = do
-            id <- optionMaybe goIdentifier
+goReceiver = between goTokLParen goTokRParen (try namedrec <|> anonrec)
+    where namedrec = do
+            -- Named receiver
+            id <- goIdentifier
             pt <- optionMaybe goTokAsterisk
             ty <- goTypeName -- Go @BaseTypeName@
-            return $ GoRec (isJust pt) id ty
+            return $ GoRec (isJust pt) (Just id) ty
+          anonrec = do
+            pt <- optionMaybe goTokAsterisk
+            ty <- goTypeName -- Go @BaseTypeName@
+            return $ GoRec (isJust pt) Nothing ty
 
 -- | Standard @Operand@
 --
