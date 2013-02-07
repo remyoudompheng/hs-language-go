@@ -90,6 +90,10 @@ testStructDecl1 = testParse "struct decl with embedded field"
       , GoFieldAnon {getFieldTag = "", getFieldPtr = False, getFieldType = GoTypeName [] (GoId "U")} 
       ]
 
+testLabel1 = testParse "labelled statement"
+    goStatement "label: return" $
+    GoStmtLabeled (GoId "label") (GoStmtReturn [])
+
 testsParser =
   [ testBuiltin1
   , testBuiltin2
@@ -104,4 +108,5 @@ testsParser =
   , testMethod2
   , testSelector1
   , testStructDecl1
+  , testLabel1
   ]

@@ -726,8 +726,8 @@ goConversion = do
 -- See also: SS. 11. Statements
 goStatement :: GoParser GoStmt
 goStatement =  (liftM GoStmtDecl goDeclaration)   -- 'Statement/Declaration'
+           <|> try goLabeledStmt                  -- label and identifier are the same token
            <|> (liftM GoStmtSimple goSimple)      -- 'Statement/SimpleStmt'
-           <|> goLabeledStmt
            <|> goGoStmt
            <|> goReturnStmt
            <|> goBreakStmt
