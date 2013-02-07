@@ -112,7 +112,7 @@ goStructType = do
 --
 -- See also: SS. 6.6. Struct types
 goFieldDecl :: GoParser GoFieldType
-goFieldDecl = field <|> anonymous where
+goFieldDecl = (try field) <|> anonymous where
 
     field = do -- Go @FieldDecl@
       ids <- goIdentifierList
@@ -253,7 +253,7 @@ goBlock =  liftM GoBlock $ goBlockish goAnyStatement
 
 -- | Nonstandard
 goBlockish :: GoParser a -> GoParser [a]
-goBlockish =  goBrace . many . goSemi
+goBlockish p = goBrace $ sepEndBy p goTokSemicolon
 
 -- | Standard @Declaration@
 --

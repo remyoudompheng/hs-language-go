@@ -75,6 +75,13 @@ testSelector1 = testParse "selector on index expression"
     goExpression "a[i].field" $
     GoPrim (GoSelect (GoIndex (GoQual [] (GoId "a")) (GoPrim (GoQual [] (GoId "i")))) (GoId "field"))
 
+testStructDecl1 = testParse "struct decl with embedded field"
+    goType "struct { Field T; U }" $
+    GoStructType
+      [ GoFieldType {getFieldTag = "", getFieldId = [GoId "Field"], getFieldType = GoTypeName [] (GoId "T")}
+      , GoFieldAnon {getFieldTag = "", getFieldPtr = False, getFieldType = GoTypeName [] (GoId "U")} 
+      ]
+
 testsParser =
   [ testBuiltin1
   , testBuiltin2
@@ -87,4 +94,5 @@ testsParser =
   , testLiteral3
   , testMethod1
   , testSelector1
+  , testStructDecl1
   ]
