@@ -1,10 +1,11 @@
-module Language.Go.Parser.Operators where
+module Language.Go.Parser.Operators (goOpExpr) where
 import Language.Go.Parser.Tokens
 import Language.Go.Syntax.AST
 import Text.Parsec.Expr
 
 goOpExpr :: GoParser GoExpr -> GoParser GoExpr
 goOpExpr p = buildExpressionParser goOpTable p
+
 goOpTable =
   [ [ Prefix (goTokPlus  (Go1Op))
     , Prefix (goTokMinus (Go1Op))
@@ -12,7 +13,7 @@ goOpTable =
     , Prefix (goTokAND   (Go1Op))
     , Prefix (goTokXOR   (Go1Op))
     , Prefix (goTokStar  (Go1Op))
-    , Prefix (goTokArrow (Go1Op)) ]
+    , Prefix (goTokRecv         ) ]
   , [ Infix  (goTokStar  (Go2Op)) AssocLeft
     , Infix  (goTokSolidus      ) AssocLeft
     , Infix  (goTokPercent      ) AssocLeft
@@ -34,25 +35,28 @@ goOpTable =
   , [ Infix  (goTokLOR          ) AssocLeft ]
   ]
 
+-- BEGIN operators
+goTokLOR      = do token GoTokLOR      ; return$Go2Op$GoOp "||" -- '||'
+goTokLAND     = do token GoTokLAND     ; return$Go2Op$GoOp "&&" -- '&&'
+goTokEQ       = do token GoTokEQ       ; return$Go2Op$GoOp "==" -- '=='
+goTokNE       = do token GoTokNE       ; return$Go2Op$GoOp "!=" -- '!='
+goTokLT       = do token GoTokLT       ; return$Go2Op$GoOp "<"  -- '<'
+goTokLE       = do token GoTokLE       ; return$Go2Op$GoOp "<=" -- '<='
+goTokGT       = do token GoTokGT       ; return$Go2Op$GoOp ">"  -- '>'
+goTokGE       = do token GoTokGE       ; return$Go2Op$GoOp ">=" -- '>='
+goTokPlus   f = do token GoTokPlus     ; return$  f  $GoOp "+"  -- '+'
+goTokMinus  f = do token GoTokMinus    ; return$  f  $GoOp "-"  -- '-'
+goTokIOR      = do token GoTokIOR      ; return$Go2Op$GoOp "|"  -- '|'
+goTokXOR    f = do token GoTokXOR      ; return$  f  $GoOp "^"  -- '^'
+goTokStar   f = do token GoTokAsterisk ; return$  f  $GoOp "*"  -- '*'
+goTokSolidus  = do token GoTokSolidus  ; return$Go2Op$GoOp "/"  -- '/'
+goTokPercent  = do token GoTokPercent  ; return$Go2Op$GoOp "%"  -- '%'
+goTokSHL      = do token GoTokSHL      ; return$Go2Op$GoOp "<<" -- '<<'
+goTokSHR      = do token GoTokSHR      ; return$Go2Op$GoOp ">>" -- '>>'
+goTokAND    f = do token GoTokAND      ; return$  f  $GoOp "&"  -- '&'
+goTokBUT      = do token GoTokBUT      ; return$Go2Op$GoOp "&^" -- '&^'
+goTokExclaim  = do token GoTokExclaim  ; return$Go1Op$GoOp "!"  -- '!'
+goTokRecv     = do token GoTokArrow    ; return$Go1Op$GoOp "<-" -- '<-'
+-- END operators
 
---goBinary :: GoParser GoExpr -> GoParser GoExpr
---goBinary p = buildExpressionParser goBinaryTable p
---goBinaryTable =
---goUnaryExpr =  goPrimaryExpr
---           <|> do op <- goUnaryOp
---                  ex <- goUnaryExpr
---                  return $ Go1Op op ex
---goBinaryExpr ex = try $ do
---  op <- goBinaryOp
---  e2 <- goExpression
---  return $ Go2Op op ex e2
---goBinaryExpr' :: GoExpr -> GoParser GoExpr
---goBinaryExpr' ex = (goBinaryExpr ex >>= goBinaryExpr') <|> return ex
-{-
-TODO:
- [X] operator precedence
- [X] operator associativity
 
--- See also: SS. 10.12.1. Operator precedence
-etc.
--}

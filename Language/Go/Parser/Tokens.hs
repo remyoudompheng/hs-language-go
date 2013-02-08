@@ -227,36 +227,8 @@ goTokComma    = token $ GoTokComma     -- ','
 goTokFullStop = token $ GoTokFullStop  -- '.'
 goTokElipsis  = token $ GoTokElipsis   -- '...'
 
-
--- BEGIN operators
-goTokLOR      = do token GoTokLOR      ; return$Go2Op$GoOp "||" -- '||'
-goTokLAND     = do token GoTokLAND     ; return$Go2Op$GoOp "&&" -- '&&'
-goTokEQ       = do token GoTokEQ       ; return$Go2Op$GoOp "==" -- '=='
-goTokNE       = do token GoTokNE       ; return$Go2Op$GoOp "!=" -- '!='
-goTokLT       = do token GoTokLT       ; return$Go2Op$GoOp "<"  -- '<'
-goTokLE       = do token GoTokLE       ; return$Go2Op$GoOp "<=" -- '<='
-goTokGT       = do token GoTokGT       ; return$Go2Op$GoOp ">"  -- '>'
-goTokGE       = do token GoTokGE       ; return$Go2Op$GoOp ">=" -- '>='
-goTokPlus   f = do token GoTokPlus     ; return$  f  $GoOp "+"  -- '+'
-goTokMinus  f = do token GoTokMinus    ; return$  f  $GoOp "-"  -- '-'
-goTokIOR      = do token GoTokIOR      ; return$Go2Op$GoOp "|"  -- '|'
-goTokXOR    f = do token GoTokXOR      ; return$  f  $GoOp "^"  -- '^'
-goTokStar   f = do token GoTokAsterisk ; return$  f  $GoOp "*"  -- '*'
-goTokSolidus  = do token GoTokSolidus  ; return$Go2Op$GoOp "/"  -- '/'
-goTokPercent  = do token GoTokPercent  ; return$Go2Op$GoOp "%"  -- '%'
-goTokSHL      = do token GoTokSHL      ; return$Go2Op$GoOp "<<" -- '<<'
-goTokSHR      = do token GoTokSHR      ; return$Go2Op$GoOp ">>" -- '>>'
-goTokAND    f = do token GoTokAND      ; return$  f  $GoOp "&"  -- '&'
-goTokBUT      = do token GoTokBUT      ; return$Go2Op$GoOp "&^" -- '&^'
-goTokExclaim  = do token GoTokExclaim  ; return$Go1Op$GoOp "!"  -- '!'
-goTokArrow  f = do token GoTokArrow    ; return$  f  $GoOp "<-" -- '<-'
-goTokDec      = do token GoTokDec      ; return$Go1Op$GoOp "--" -- '--'
-goTokIng      = do token GoTokInc      ; return$Go1Op$GoOp "++" -- '++'
--- END operators
-
-goTokAsterisk = goTokStar (\x -> ())
-goTokArrow1 = do goTokArrow (Go1Op) ; return $GoOp "<-"
-goTokArrow2 = do goTokArrow (Go2Op) ; return $GoOp "<-"
+goTokAsterisk = token $ GoTokAsterisk
+goTokArrow    = token $ GoTokArrow
 
 -- BEGIN keywords
 goTokBreak    = token $ GoTokBreak
@@ -286,11 +258,6 @@ goTokType     = token $ GoTokType
 goTokVar      = token $ GoTokVar
 -- END keywords
 
-
-
-
---
-
 goIdentifier :: GoParser GoId
 goIdentifier = do
   GoTokId name <- token $ GoTokId ""
@@ -300,19 +267,6 @@ goOperator :: GoParser GoOp
 goOperator = do
   GoTokOp name <- token $ GoTokOp ""
   return $ GoOp name
-
-goUnaryOp :: GoParser GoOp
-goUnaryOp = goOperator
-
-goBinaryOp :: GoParser GoOp
-goBinaryOp = do
-  op <- goOperator
-  case op of
-    (GoOp "<-") -> fail "binary op"
-    (GoOp ":=") -> fail "binary op"
-    (GoOp "=")  -> fail "binary op"
-    _ -> return op -- goOperator
-
 
 -- | Standard @assign_op@
 --

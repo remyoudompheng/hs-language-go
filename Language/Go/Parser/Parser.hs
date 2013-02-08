@@ -240,9 +240,9 @@ goChannelType = do
 
 -- | Nonstandard
 goChannelQuip :: GoParser GoChanKind
-goChannelQuip =  do goTokArrow1 ; goTokChan ; return GoIChan         -- 1=RecvDir
-             <|> (try $ do goTokChan ; goTokArrow1 ; return GoOChan) -- 2=SendDir
-             <|> (try $ do goTokChan ; return GoIOChan)              -- 3=BothDir
+goChannelQuip =  do goTokArrow ; goTokChan ; return GoIChan         -- 1=RecvDir
+             <|> (try $ do goTokChan ; goTokArrow ; return GoOChan) -- 2=SendDir
+             <|> (try $ do goTokChan ; return GoIOChan)             -- 3=BothDir
 
 -- See also: SS. 7.1. Type identity
 -- See also: SS. 7.2. Assignability
@@ -811,7 +811,7 @@ goLabeledStmt = do
 goSendStmt :: GoParser GoSimp
 goSendStmt = do
   ch <- goExpression -- Go @Channel@
-  goTokArrow2
+  goTokArrow
   ex <- goExpression
   return $ GoSimpSend ch ex
 
@@ -1016,7 +1016,7 @@ goRecvExpr =  try goRecvExpr'
           <|> goParen goRecvExpr where
 
     goRecvExpr' = do
-      goTokArrow1
+      goTokArrow
       ex <- goExpression
       return $ Go1Op (GoOp "<-") ex
 
