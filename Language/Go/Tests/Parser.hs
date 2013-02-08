@@ -127,6 +127,10 @@ testStructDecl1 = testParse "struct decl with embedded field"
       , GoFieldAnon {getFieldTag = "", getFieldPtr = False, getFieldType = namedType "U"} 
       ]
 
+testIfaceDecl1 = testParse "interface decl with embedded qualified interface"
+    goType "interface { io.Reader }" $
+    GoInterfaceType [GoIfaceName (Just (GoId "io")) (GoId "Reader")]
+
 testLabel1 = testParse "labelled statement"
     goStatement "label: return" $
     GoStmtLabeled (GoId "label") (GoStmtReturn [])
@@ -172,6 +176,7 @@ testsParser =
   , testSelector1
   , testTypeAssert1
   , testStructDecl1
+  , testIfaceDecl1
   , testLabel1
   , testFor1
   , testIf1

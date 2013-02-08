@@ -54,8 +54,8 @@ data GoFuncDecl  = GoFuncDecl       GoId GoSig GoBlock
 data GoMethDecl  = GoMethDecl GoRec GoId GoSig GoBlock
                 deriving (Eq, Read, Show)
 
-data GoMethSpec  = GoMethSpec       GoId GoSig
-                 | GoInterface      GoId
+data GoMethSpec  = GoMethSpec  GoId GoSig
+                 | GoIfaceName (Maybe GoId) GoId
                 deriving (Eq, Read, Show)
 
 -- GoId (= 'identifier')

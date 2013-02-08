@@ -208,9 +208,11 @@ goInterfaceType = do
 -- | Standard @MethodSpec@
 --
 -- See also: SS. 6.9. Interface types
-goMethodSpec = goMethodSpec' <|> goMethodSpec'' where
+goMethodSpec = try goMethodSpec' <|> goMethodSpec'' where
 
-    goMethodSpec'' = liftM GoInterface goIdentifier -- Go @InterfaceTypeName@
+    goMethodSpec'' = do
+      GoQual pkg id <- goQualifiedIdent -- Go @InterfaceTypeName@
+      return $ GoIfaceName pkg id
 
     goMethodSpec' = do
       n <- goIdentifier -- Go @MethodName@
