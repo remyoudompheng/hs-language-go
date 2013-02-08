@@ -135,6 +135,24 @@ testFor1 = testParse "while true"
     goStatement "for {}" $
     GoStmtFor (GoForWhile Nothing) (GoBlock [])
 
+testIf1 = testParse "if statement with init"
+    goStatement "if v, ok := F(); ok {}" $
+    GoStmtIf
+      (GoCond (Just stmt) (Just $ ident "ok"))
+      (GoBlock [])
+      Nothing
+  where
+    stmt = GoSimpVar [GoId "v", GoId "ok"] [GoPrim (GoCall (GoQual Nothing (GoId "F")) [] False)]
+
+testIf2 = testParse "if statement with complex terms"
+    goStatement "if F() {}" $
+    GoStmtIf
+      (GoCond Nothing $ Just expr)
+      (GoBlock [])
+      Nothing
+  where
+    expr = GoPrim (GoCall (GoQual Nothing (GoId "F")) [] False)
+
 testsParser =
   [ testImport1
   , testBuiltin1
@@ -156,4 +174,6 @@ testsParser =
   , testStructDecl1
   , testLabel1
   , testFor1
+  , testIf1
+  , testIf2
   ]

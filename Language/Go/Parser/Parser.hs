@@ -586,6 +586,32 @@ goPrimary = do
         veryComplex vex) <|> return prefix
     veryComplex ex
 
+-- | Expressions that can be used in an if/for/switch clause.
+-- Composite literals of the form T{...} cannot appear at top level
+-- due to a parsing ambiguity.
+goSimpleExpr :: GoParser GoExpr
+goSimpleExpr = goOpExpr (liftM GoPrim goSimplePrimary)
+            <?> "expression"
+
+goSimplePrimary :: GoParser GoPrim
+goSimplePrimary = do
+    -- FIXME: should parse general expressions here while still
+    -- refusing compositel literals.
+    let goSimpleOperand = try (liftM GoLiteral goBasicLit)
+                      <|> try goQualifiedIdent
+                      <|> try goMethodExpr
+                      <|> liftM GoParen (goParen goExpression)
+    ex <- (try goBuiltinCall) <|> (try goSimpleOperand) <|> (try goConversion)
+    let complex prefix = (try $ goIndex prefix)
+                  <|> (try $ goSlice prefix)
+                  <|> try (goTypeAssertion prefix)
+                  <|> goCall prefix
+                  <|> goSelector prefix
+    let veryComplex prefix = try (do
+        vex <- complex prefix
+        veryComplex vex) <|> return prefix
+    veryComplex ex
+
 -- | Standard @Selector@
 --
 -- See also: SS. 10.5. Primary expressions, 10.6. Selectors
@@ -818,10 +844,10 @@ goIfStmt :: GoParser GoStmt
 goIfStmt = do
   goTokIf
   s <- optionMaybe (goSemi goSimple)
-  c <- optionMaybe goExpression
+  c <- goSimpleExpr
   b <- goBlock
   e <- optionMaybe (goTokElse >> goStatement)
-  return $ GoStmtIf (GoCond s c) b e
+  return $ GoStmtIf (GoCond s (Just c)) b e
 
 -- | Standard @IfStmt@
 --
