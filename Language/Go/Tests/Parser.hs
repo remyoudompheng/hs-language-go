@@ -210,7 +210,7 @@ testsParser =
   , testLiteral2
   , testLiteral3
   , testLiteral4
-  -- , testOp1
+  , testOp1
   , testOp2
   -- , testCall1
   , testCall2

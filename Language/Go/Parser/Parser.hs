@@ -567,17 +567,11 @@ goFuncLambda = do
 -- here is convert the AST one level, so it's an expression.
 --
 -- See also: SS. 10.5. Primary expressions
-goPrimaryExpr :: GoParser GoExpr
-goPrimaryExpr = liftM GoPrim goPrimary
 
 -- | Nonstandard primary expressions (self-contained)
-goPrimary :: GoParser GoPrim
-goPrimary = do
-    -- Try builtin call first because the prefix looks like an
-    -- identifier.
-    -- goConversion only matches for unnamed types (names match
-    -- goOperand).
-    ex <- (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
+goPrimary :: GoParser GoPrim -> GoParser GoExpr
+goPrimary prim = do
+    ex <- prim
     let complex prefix = (try $ goIndex prefix)
                   <|> (try $ goSlice prefix)
                   <|> try (goTypeAssertion prefix)
@@ -586,33 +580,23 @@ goPrimary = do
     let veryComplex prefix = try (do
         vex <- complex prefix
         veryComplex vex) <|> return prefix
-    veryComplex ex
+    pr <- veryComplex ex
+    return $ GoPrim pr
 
 -- | Expressions that can be used in an if/for/switch clause.
 -- Composite literals of the form T{...} cannot appear at top level
 -- due to a parsing ambiguity.
 goSimpleExpr :: GoParser GoExpr
-goSimpleExpr = goOpExpr (liftM GoPrim goSimplePrimary)
+goSimpleExpr = goExpressionSkel prim
             <?> "expression"
-
-goSimplePrimary :: GoParser GoPrim
-goSimplePrimary = do
+  where 
     -- FIXME: should parse general expressions here while still
     -- refusing compositel literals.
-    let goSimpleOperand = try (liftM GoLiteral goBasicLit)
+    goSimpleOperand = try (liftM GoLiteral goBasicLit)
                       <|> try goQualifiedIdent
                       <|> try goMethodExpr
                       <|> liftM GoParen (goParen goExpression)
-    ex <- (try goBuiltinCall) <|> (try goSimpleOperand) <|> (try goConversion)
-    let complex prefix = (try $ goIndex prefix)
-                  <|> (try $ goSlice prefix)
-                  <|> try (goTypeAssertion prefix)
-                  <|> goCall prefix
-                  <|> goSelector prefix
-    let veryComplex prefix = try (do
-        vex <- complex prefix
-        veryComplex vex) <|> return prefix
-    veryComplex ex
+    prim = (try goBuiltinCall) <|> (try goSimpleOperand) <|> (try goConversion)
 
 -- | Standard @Selector@
 --
@@ -684,30 +668,32 @@ goCall ex = do
 --
 -- See also: SS. 10.12. Operators
 goExpression :: GoParser GoExpr
-goExpression = goOpExpr goPrimaryExpr
+goExpression = goExpressionSkel prim
             <?> "expression"
+  where
+    -- Try builtin call first because the prefix looks like an
+    -- identifier.
+    -- goConversion only matches for unnamed types (names match
+    -- goOperand).
+    prim = (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
 
---    goUnaryExpr
---    <|> goBinaryExpr
+goPrimaryExpr :: GoParser GoExpr
+goPrimaryExpr = goPrimary prim
+  where prim = (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
 
--- | Standard @UnaryExpr@
+-- | goExpressionSkel creates an expression parser
+-- from a primary expression parser. It is shared between
+-- goExpression and goSimpleExpression.
 --
--- See also: SS. 10.12. Operators
---goUnaryExpr :: GoParser GoExpr
---goUnaryExpr =  goPrimaryExpr
---           <|> do f <- goTokPlus(Go1Op); x <- goPrimaryExpr; return f x
---           <|> do f <- goTokMinus(Go1Op); x <- goPrimaryExpr; return f x
---           <|> do f <- goTokAND(Go1Op); x <- goPrimaryExpr; return f x
---           <|> do f <- goTokAND(Go1Op); x <- goPrimaryExpr; return f x
---           <|> do f <- goTokAND(Go1Op); x <- goPrimaryExpr; return f x
---
----- | Nonstandard
-----
----- We cheat here and make them right-associative
----- even though the standard indicates left-associative
----- this could be reversed later during processing
---goBinaryExpr :: GoParser GoExpr
---goBinaryExpr = goBinary goUnaryExpr
+-- Parenthesized subexpression can contain arbitrary terms.
+goExpressionSkel :: GoParser GoPrim -> GoParser GoExpr
+goExpressionSkel prim = goOpExpr unaryExpr
+  where unaryExpr = try unaryOpExpr <|> primaryExpr
+        unaryOpExpr = do
+          op <- goUnaryOp
+          expr <- goParen goExpression <|> unaryExpr
+          return $ Go1Op op expr
+        primaryExpr = goPrimary prim
 
 -- | Standard @MethodExpr@
 --
