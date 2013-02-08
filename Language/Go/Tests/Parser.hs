@@ -116,9 +116,21 @@ testLiteral4 = testParse "map literal with composite keys"
       )
   where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
 
-testRecv1 = testParse "receive operator"
+testOp1 = testParse "expression with operator"
+    goExpression "!*p" $
+    Go1Op (GoOp "!") $ Go1Op (GoOp "*") $ ident "p"
+
+testOp2 = testParse "receive operator"
     goExpression "<-c" $
-    Go1Op (GoOp "<-") (GoPrim (GoQual Nothing (GoId "c")))
+    Go1Op (GoOp "<-") $ ident "c"
+
+testCall1 = testParse "call with trailing comma after args"
+    goExpression "f(a,b,c,)" $
+    GoPrim $ GoCall (GoQual Nothing $ GoId "f") (map ident ["a", "b", "c"]) False
+
+testCall2 = testParse "call with comment (used to insert semicolon)"
+   goExpression "f(a, b, c /* comment */)" $
+   GoPrim $ GoCall (GoQual Nothing $ GoId "f") (map ident ["a", "b", "c"]) False
 
 testMethod1 = testParse "method call"
     goExpression "time.Now()" $
@@ -159,6 +171,10 @@ testFor1 = testParse "while true"
     goStatement "for {}" $
     GoStmtFor (GoForWhile Nothing) (GoBlock [])
 
+-- testFor2 = testParse "for with parsing ambiguity"
+--     goStatement "for a = a.prev; a.level > level; a = a.prev {}" $
+--     GoStmtFor (GoForWhile Nothing) (GoBlock [])
+
 testIf1 = testParse "if statement with init"
     goStatement "if v, ok := F(); ok {}" $
     GoStmtIf
@@ -194,7 +210,10 @@ testsParser =
   , testLiteral2
   , testLiteral3
   , testLiteral4
-  , testRecv1
+  -- , testOp1
+  , testOp2
+  -- , testCall1
+  , testCall2
   , testMethod1
   , testMethod2
   , testSelector1
@@ -203,6 +222,7 @@ testsParser =
   , testIfaceDecl1
   , testLabel1
   , testFor1
+  -- , testFor2
   , testIf1
   , testIf2
   ]

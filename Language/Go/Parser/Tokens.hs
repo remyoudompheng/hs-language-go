@@ -5,6 +5,8 @@
 --
 -- x
 module Language.Go.Parser.Tokens where
+
+import Data.Maybe (mapMaybe)
 import Language.Go.Syntax.AST
 import Text.Parsec.String
 import Text.Parsec.Prim hiding (token)
@@ -24,7 +26,7 @@ data GoTokenPos = GoTokenPos !SourcePos !GoToken
 
 -- | GoToken encodes tokens
 data GoToken = GoTokNone
-             | GoTokComment Bool String
+             | GoTokComment Bool String -- False=singleline True=multiline
 -- BEGIN literals
              | GoTokInt  (Maybe String) Integer
              | GoTokReal (Maybe String) Float
@@ -155,10 +157,12 @@ token tok = Prim.token showTok posnTok testTok
                                        else Nothing
 
 stripComments :: [GoTokenPos] -> [GoTokenPos]
-stripComments tokens = map nocomm tokens where
-    nocomm (xt@(GoTokenPos xp x)) = if (tokenEq x (GoTokComment False ""))
-                                    then (GoTokenPos xp GoTokSemicolonAuto)
-                                    else xt
+stripComments tokens = mapMaybe nocomm tokens where
+    nocomm tok = case tok of
+        -- single line comment: restore newline
+        GoTokenPos pos (GoTokComment False _) -> Just $ GoTokenPos pos GoTokSemicolonAuto
+        GoTokenPos _ (GoTokComment True _) -> Nothing
+        _ -> Just tok
 
 stripNone :: [GoTokenPos] -> [GoTokenPos]
 stripNone tokens = filter nonull tokens where
