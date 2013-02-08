@@ -11,7 +11,8 @@ goOpTable =
     , Prefix (goTokExclaim      )
     , Prefix (goTokAND   (Go1Op))
     , Prefix (goTokXOR   (Go1Op))
-    , Prefix (goTokStar  (Go1Op)) ]
+    , Prefix (goTokStar  (Go1Op))
+    , Prefix (goTokArrow (Go1Op)) ]
   , [ Infix  (goTokStar  (Go2Op)) AssocLeft
     , Infix  (goTokSolidus      ) AssocLeft
     , Infix  (goTokPercent      ) AssocLeft
@@ -29,7 +30,6 @@ goOpTable =
     , Infix  (goTokLE           ) AssocLeft
     , Infix  (goTokGT           ) AssocLeft
     , Infix  (goTokGE           ) AssocLeft ]
---  , [ Infix  (goTokArrow (Go2Op)) AssocLeft ] -- Removed 2011-Feb
   , [ Infix  (goTokLAND         ) AssocLeft ]
   , [ Infix  (goTokLOR          ) AssocLeft ]
   ]

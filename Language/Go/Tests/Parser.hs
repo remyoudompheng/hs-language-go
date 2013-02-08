@@ -51,6 +51,10 @@ testSelect2 = testParse "test select with empty case"
     goStatement "select { case <-ch: }" $
     GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "ch"))))] []]
 
+testSelect3 = testParse "test select with parentheses"
+    goStatement "select { case (<-ch): }" $
+    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "ch"))))] []]
+
 testLiteral1 = testParse "empty composite literal"
     goCompositeLit "T{}" $
     GoLitComp (GoTypeName [] (GoId "T")) (GoComp [])
@@ -86,6 +90,10 @@ testLiteral4 = testParse "map literal with composite keys"
       )
   where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
         typ s = GoTypeName [] (GoId s)
+
+testRecv1 = testParse "receive operator"
+    goExpression "<-c" $
+    Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "c")))
 
 testMethod1 = testParse "method call"
     goExpression "time.Now()" $
@@ -126,10 +134,12 @@ testsParser =
   , testSwitch1
   , testSelect1
   , testSelect2
+  , testSelect3
   , testLiteral1
   , testLiteral2
   , testLiteral3
   , testLiteral4
+  , testRecv1
   , testMethod1
   , testMethod2
   , testSelector1

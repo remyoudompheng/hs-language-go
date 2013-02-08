@@ -972,10 +972,10 @@ goChanStmt = try (goSendStmt >>= convert) <|> goRecvStmt
 -- See also: SS. 11.11. Select statements
 goRecvStmt :: GoParser GoChan
 goRecvStmt = do
-  as <- optionMaybe $ do
+  as <- optionMaybe $ try (do
                ex <- goExpression
                op <- goAnyEqual
-               return (ex, op)
+               return (ex, op))
   re <- goRecvExpr
   return $ GoChanRecv as re
 
@@ -983,7 +983,7 @@ goRecvStmt = do
 --
 -- See also: SS. 11.11. Select statements
 goRecvExpr :: GoParser GoExpr
-goRecvExpr =  goRecvExpr'
+goRecvExpr =  try goRecvExpr'
           <|> goParen goRecvExpr where
 
     goRecvExpr' = do
