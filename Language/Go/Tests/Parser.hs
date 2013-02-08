@@ -65,6 +65,22 @@ testSelect3 = testParse "test select with parentheses"
     goStatement "select { case (<-ch): }" $
     GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
 
+testConst1 = testParse "raw string constant"
+    goExpression "`hello`" $
+    GoPrim $ GoLiteral $ GoLitStr "`hello`" "hello"
+
+testConst2 = testParse "rune literal of backquote"
+    goExpression "'`'" $
+    GoPrim $ GoLiteral $ GoLitChar "'`'" '`'
+
+-- testConst3 = testParse "rune literal of single quote"
+--     goExpression "'\\''" $
+--     GoPrim $ GoLiteral $ GoLitChar "'\\''" '\''
+
+testConst4 = testParse "rune literal of backslash"
+    goExpression "'\\\\'" $
+    GoPrim $ GoLiteral $ GoLitChar "'\\\\'" '\\'
+
 testLiteral1 = testParse "empty composite literal"
     goCompositeLit "T{}" $
     GoLitComp (namedType "T") (GoComp [])
@@ -171,6 +187,9 @@ testsParser =
   , testSelect1
   , testSelect2
   , testSelect3
+  , testConst1
+  , testConst2
+  -- , testConst3
   , testLiteral1
   , testLiteral2
   , testLiteral3

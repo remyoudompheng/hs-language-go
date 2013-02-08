@@ -11,7 +11,8 @@ import Text.Parsec.Pos
 -- SS. 3.1. Characters
 @unicode_char   = [\x00-\x7F]|[\x80-\xFF]+
 @unicode_nobr   = [\x00-\x5C\x5E-\x7F]|[\x80-\xFF]+
-@unicode_nobq   = $printable # '`'
+@unicode_nobq   = $printable # `
+@unicode_nosq   = $printable # [\' \n \\]
 @unicode_nodq   = $printable # \"
 @unicode_letter = [A-Za-z] -- should be [\p{L}]
 @unicode_digit  = [0-9]    -- should be [\p{N}]
@@ -22,7 +23,6 @@ $decimal_digit  = [0-9]
 $octal_digit    = [0-7]
 $hex_digit      = [0-9A-Fa-f]
 $sign           = [\+\-]
-$punctuation    = [\!\@\#\$\%\^\&\*\-\+=\<\>\,\.\:\|\\\/\?\~]
 
 -- SS. 4.1. Comments
 @ol_char    = [^\n]
@@ -38,7 +38,9 @@ $whiteline  = [\n]
 @identifier = @letter(@letter|@unicode_digit)*
 
 -- SS. 4.6. Operators and Delimiters
-@operator   = $punctuation+
+$add_op     = [\+\-\|\^]
+@mul_op     = [\*\\\/\%\&] | "<<" | ">>" | "&^"
+@assignop   = $add_op"=" | @mul_op"="
 
 -- SS. 4.7. Integer literals
 @decimallit = [1-9]($decimal_digit)*
@@ -65,7 +67,7 @@ $whiteline  = [\n]
 @byte_value     = (@oct_byte_value|@hex_byte_value)
 
 -- SS. 4.10. Character literals
-@char_lit   = \'(@unicode_value|@byte_value)\'
+@char_lit   = \'(@unicode_nosq|@little_u_value|@big_u_value|@escaped_char|@byte_value)\'
 
 -- SS. 4.11. String literals
 @raw_string_lit = \`(@unicode_nobq)*\`
@@ -129,7 +131,7 @@ tokens :-
   "--"            { \p s -> posify p $ GoTokDec }
   "++"            { \p s -> posify p $ GoTokInc }
 -- END operators
-  @operator       { \p s -> posify p $ GoTokOp s }
+  @assignop       { \p s -> posify p $ GoTokOp s }
 
 -- BEGIN keywords
   break           { \p s -> posify p $ GoTokBreak }
