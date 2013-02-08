@@ -18,6 +18,10 @@ testParse desc parser text ref = TestLabel desc $ TestCase $ assertEqual desc wa
     where got = strerror $ goParseTestWith (do { p <- parser; optional goTokSemicolon; eof; return p }) text
           want = Right ref
 
+testImport1 = testParse "dot import"
+    goImportDecl "import . \"os\"" $
+    GoImportDecl [GoImpSpec GoImpDot "os"]
+
 testBuiltin1 = testParse "test builtin make"
     goBuiltinCall "make([]int, 4)" $
     (GoMake (GoSliceType (GoTypeName [] (GoId "int"))) [GoPrim (GoLiteral (GoLitInt "4" 4))])
@@ -115,7 +119,8 @@ testFor1 = testParse "while true"
     GoStmtFor (GoForWhile Nothing) (GoBlock [])
 
 testsParser =
-  [ testBuiltin1
+  [ testImport1
+  , testBuiltin1
   , testBuiltin2
   , testConversion1
   , testSwitch1

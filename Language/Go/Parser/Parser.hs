@@ -273,14 +273,6 @@ goTopLevelDecl =  goDeclaration
               <|> try goMethodDecl
 --              <?> "top-level declaration"
 
--- | Nonstandard
---
--- This is not part of the standard, but is here to abstract away
--- some of the details of possible extensions to the language.
---
-goTopLevelPrel :: GoParser GoPrel
-goTopLevelPrel = goImportDecl
-
 -- | Standard @ConstDecl@
 --
 -- See also: SS. 9.5. Constant declarations
@@ -1056,12 +1048,12 @@ goBuiltinArgs = goTokComma >> goExpressionList
 goSource :: GoParser GoSource
 goSource = do
   pkg <- goSemi goPackageClause
-  imp <- many $ goSemi goTopLevelPrel
+  imp <- many $ goSemi goImportDecl
   top <- many $ goSemi goTopLevelDecl
   eof
 --goSourceRest
 --notFolloedBy anyToken
-  return $ GoSource pkg [] top
+  return $ GoSource pkg imp top
 
 -- | Nonstandard
 goSourceRest :: GoParser ()
@@ -1107,20 +1099,13 @@ goImportSpec = goImpSpecs'' <|> goImpSpecs' where
       return $ GoImpSpec ty ip
 
     goImpType :: GoParser GoImpType
-    goImpType = lookAhead anyToken >>= \(GoTokenPos _ tok) ->
-                case tok of
-                  GoTokId _       -> liftM GoImpQual goIdentifier
-                  GoTokFullStop   -> liftM GoImpDot goOperator
-                  GoTokStr _ _ -> return GoImp
-                  _ -> fail "language-go: bad import"
+    goImpType = try dot <|> try qual <|> return GoImp
+      where dot = do { goTokFullStop; return GoImpDot }
+            qual = do { id <- goIdentifier; return $ GoImpQual id }
 
 --
 --  End specification grammar
 --
-
-
-
-
 
 -- combinators
 

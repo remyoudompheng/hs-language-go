@@ -35,7 +35,7 @@ data GoImpSpec = GoImpSpec GoImpType String
                 deriving (Eq, Read, Show)
 
 data GoImpType = GoImp
-               | GoImpDot  GoOp
+               | GoImpDot
                | GoImpQual GoId
                 deriving (Eq, Read, Show)
 
