@@ -185,7 +185,7 @@ data GoBlock = GoBlock { getStmt::[GoStmt] }
              | GoNoBlock
                 deriving (Eq, Read, Show)
 
-data GoForClause = GoForWhile GoExpr
+data GoForClause = GoForWhile (Maybe GoExpr)
                  | GoForThree GoSimp (Maybe GoExpr) GoSimp
                  | GoForRange [GoExpr] GoExpr
                 deriving (Eq, Read, Show)

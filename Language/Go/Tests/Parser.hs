@@ -110,6 +110,10 @@ testLabel1 = testParse "labelled statement"
     goStatement "label: return" $
     GoStmtLabeled (GoId "label") (GoStmtReturn [])
 
+testFor1 = testParse "while true"
+    goStatement "for {}" $
+    GoStmtFor (GoForWhile Nothing) (GoBlock [])
+
 testsParser =
   [ testBuiltin1
   , testBuiltin2
@@ -126,4 +130,5 @@ testsParser =
   , testSelector1
   , testStructDecl1
   , testLabel1
+  , testFor1
   ]

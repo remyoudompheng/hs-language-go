@@ -910,7 +910,7 @@ goForStmt = do
 
 -- | Standard @Condition@
 goCondition :: GoParser GoForClause
-goCondition = liftM GoForWhile goExpression
+goCondition = liftM GoForWhile (optionMaybe goExpression)
 
 -- | Standard @ForClause@
 goForClause :: GoParser GoForClause
