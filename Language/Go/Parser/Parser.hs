@@ -519,17 +519,20 @@ goLiteralValue = do
 -- See also: SS. 10.3. Composite literals
 goElement :: GoParser GoElement
 goElement = do
-  key <- option GoKeyNone (try $ goAfter goTokColon goKey)
+  key <- option GoKeyNone goKey
   val <- goValue
   return $ GoElement key val
 
 -- | Standard @Key@
+-- followed by colon.
 --
 -- See also: SS. 10.3. Composite literals
 goKey :: GoParser GoKey
-goKey =  liftM GoKeyField goIdentifier -- Go @FieldName@
-     <|> liftM GoKeyIndex goExpression -- Go @ElementIndex@
+goKey =  try fieldcolon -- Go @FieldName@
+     <|> try keycolon   -- Go @ElementIndex@
      <?> "literal key"
+  where fieldcolon = do { key <- goIdentifier; goTokColon; return $ GoKeyField key }
+        keycolon = do { expr <- goExpression; goTokColon; return $ GoKeyIndex expr }
 
 -- | Standard @Value@
 --

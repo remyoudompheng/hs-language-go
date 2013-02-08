@@ -67,6 +67,22 @@ testLiteral3 = testParse "composite literal in statement"
         (GoComp [GoElement (GoKeyField (GoId "Field")) (GoValueExpr (GoPrim (GoQual [] (GoId "value"))))])
       ))]
 
+testLiteral4 = testParse "map literal with composite keys"
+    goCompositeLit "map[T]U{T{1, 2}: \"hello\"}" $
+    GoLitComp
+      (GoMapType (typ "T") (typ "U"))
+      (GoComp [
+        GoElement
+         (GoKeyIndex $ GoPrim $ GoLiteral $ GoLitComp
+           (typ "T")
+           (GoComp [GoElement GoKeyNone (lit "1" 1),
+                    GoElement GoKeyNone (lit "2" 2)])
+         )
+         (GoValueExpr $ GoPrim $ GoLiteral $ GoLitStr "\"hello\"" "hello")]
+      )
+  where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
+        typ s = GoTypeName [] (GoId s)
+
 testMethod1 = testParse "method call"
     goExpression "time.Now()" $
     GoPrim $ GoCall (GoQual [GoId "time"] (GoId "Now")) [] False
@@ -104,6 +120,7 @@ testsParser =
   , testLiteral1
   , testLiteral2
   , testLiteral3
+  , testLiteral4
   , testMethod1
   , testMethod2
   , testSelector1
