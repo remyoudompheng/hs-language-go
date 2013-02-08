@@ -1,8 +1,12 @@
 module Language.Go.Parser.Operators (goOpExpr) where
-import Language.Go.Parser.Tokens
-import Language.Go.Syntax.AST
+
 import Text.Parsec.Expr
 
+import Language.Go.Parser.Tokens
+import Language.Go.Syntax.AST
+
+-- | @goOpExpr p@ returns a parser for expressions with operators
+-- whose terms are parsed by @p@.
 goOpExpr :: GoParser GoExpr -> GoParser GoExpr
 goOpExpr p = buildExpressionParser goOpTable p
 

@@ -3,7 +3,7 @@
 -- Copyright   : (c) 2011 Andrew Robbins
 -- License     : GPLv3 (see COPYING)
 -- 
--- x
+-- This module defines the nodes of Go syntax tree.
 
 {-# LANGUAGE CPP #-}
 #define GO_AST_DERIVING deriving (Eq, Read, Show)

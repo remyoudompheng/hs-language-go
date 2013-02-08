@@ -1,7 +1,7 @@
 {
 -- |
 -- Module: Language.Go.Parser.Lexer
-module Language.Go.Parser.Lexer where
+module Language.Go.Parser.Lexer (alexScanTokens) where
 import Language.Go.Parser.Tokens
 import Text.Parsec.Pos
 }
@@ -107,58 +107,58 @@ tokens :-
   "_"             { \p s -> posify p $ GoTokId "_" }
 
 -- BEGIN operators
-  "||"            { \p s -> posify p $ GoTokLOR }
-  "&&"            { \p s -> posify p $ GoTokLAND }
-  "=="            { \p s -> posify p $ GoTokEQ }
-  "!="            { \p s -> posify p $ GoTokNE }
-  "<"             { \p s -> posify p $ GoTokLT }
-  "<="            { \p s -> posify p $ GoTokLE }
-  ">"             { \p s -> posify p $ GoTokGT }
-  ">="            { \p s -> posify p $ GoTokGE }
-  "+"             { \p s -> posify p $ GoTokPlus }
-  "-"             { \p s -> posify p $ GoTokMinus }
-  "|"             { \p s -> posify p $ GoTokIOR }
-  "^"             { \p s -> posify p $ GoTokXOR }
-  "*"             { \p s -> posify p $ GoTokAsterisk }
-  "/"             { \p s -> posify p $ GoTokSolidus }
-  "%"             { \p s -> posify p $ GoTokPercent }
-  "<<"            { \p s -> posify p $ GoTokSHL }
-  ">>"            { \p s -> posify p $ GoTokSHR }
-  "&"             { \p s -> posify p $ GoTokAND }
-  "&^"            { \p s -> posify p $ GoTokBUT }
-  "!"             { \p s -> posify p $ GoTokExclaim }
-  "<-"            { \p s -> posify p $ GoTokArrow }
-  "--"            { \p s -> posify p $ GoTokDec }
-  "++"            { \p s -> posify p $ GoTokInc }
+  "||"            { \p _ -> posify p $ GoTokLOR }
+  "&&"            { \p _ -> posify p $ GoTokLAND }
+  "=="            { \p _ -> posify p $ GoTokEQ }
+  "!="            { \p _ -> posify p $ GoTokNE }
+  "<"             { \p _ -> posify p $ GoTokLT }
+  "<="            { \p _ -> posify p $ GoTokLE }
+  ">"             { \p _ -> posify p $ GoTokGT }
+  ">="            { \p _ -> posify p $ GoTokGE }
+  "+"             { \p _ -> posify p $ GoTokPlus }
+  "-"             { \p _ -> posify p $ GoTokMinus }
+  "|"             { \p _ -> posify p $ GoTokIOR }
+  "^"             { \p _ -> posify p $ GoTokXOR }
+  "*"             { \p _ -> posify p $ GoTokAsterisk }
+  "/"             { \p _ -> posify p $ GoTokSolidus }
+  "%"             { \p _ -> posify p $ GoTokPercent }
+  "<<"            { \p _ -> posify p $ GoTokSHL }
+  ">>"            { \p _ -> posify p $ GoTokSHR }
+  "&"             { \p _ -> posify p $ GoTokAND }
+  "&^"            { \p _ -> posify p $ GoTokBUT }
+  "!"             { \p _ -> posify p $ GoTokExclaim }
+  "<-"            { \p _ -> posify p $ GoTokArrow }
+  "--"            { \p _ -> posify p $ GoTokDec }
+  "++"            { \p _ -> posify p $ GoTokInc }
 -- END operators
   @assignop       { \p s -> posify p $ GoTokOp s }
 
 -- BEGIN keywords
-  break           { \p s -> posify p $ GoTokBreak }
-  case            { \p s -> posify p $ GoTokCase }
-  chan            { \p s -> posify p $ GoTokChan }
-  const           { \p s -> posify p $ GoTokConst }
-  continue        { \p s -> posify p $ GoTokContinue }
-  default         { \p s -> posify p $ GoTokDefault }
-  defer           { \p s -> posify p $ GoTokDefer }
-  else            { \p s -> posify p $ GoTokElse }
-  fallthrough     { \p s -> posify p $ GoTokFallthrough }
-  for             { \p s -> posify p $ GoTokFor }
-  func            { \p s -> posify p $ GoTokFunc }
-  go              { \p s -> posify p $ GoTokGo }
-  goto            { \p s -> posify p $ GoTokGoto }
-  if              { \p s -> posify p $ GoTokIf }
-  import          { \p s -> posify p $ GoTokImport }
-  interface       { \p s -> posify p $ GoTokInterface }
-  map             { \p s -> posify p $ GoTokMap }
-  package         { \p s -> posify p $ GoTokPackage }
-  range           { \p s -> posify p $ GoTokRange }
-  return          { \p s -> posify p $ GoTokReturn }
-  select          { \p s -> posify p $ GoTokSelect }
-  struct          { \p s -> posify p $ GoTokStruct }
-  switch          { \p s -> posify p $ GoTokSwitch }
-  type            { \p s -> posify p $ GoTokType }
-  var             { \p s -> posify p $ GoTokVar }
+  break           { \p _ -> posify p $ GoTokBreak }
+  case            { \p _ -> posify p $ GoTokCase }
+  chan            { \p _ -> posify p $ GoTokChan }
+  const           { \p _ -> posify p $ GoTokConst }
+  continue        { \p _ -> posify p $ GoTokContinue }
+  default         { \p _ -> posify p $ GoTokDefault }
+  defer           { \p _ -> posify p $ GoTokDefer }
+  else            { \p _ -> posify p $ GoTokElse }
+  fallthrough     { \p _ -> posify p $ GoTokFallthrough }
+  for             { \p _ -> posify p $ GoTokFor }
+  func            { \p _ -> posify p $ GoTokFunc }
+  go              { \p _ -> posify p $ GoTokGo }
+  goto            { \p _ -> posify p $ GoTokGoto }
+  if              { \p _ -> posify p $ GoTokIf }
+  import          { \p _ -> posify p $ GoTokImport }
+  interface       { \p _ -> posify p $ GoTokInterface }
+  map             { \p _ -> posify p $ GoTokMap }
+  package         { \p _ -> posify p $ GoTokPackage }
+  range           { \p _ -> posify p $ GoTokRange }
+  return          { \p _ -> posify p $ GoTokReturn }
+  select          { \p _ -> posify p $ GoTokSelect }
+  struct          { \p _ -> posify p $ GoTokStruct }
+  switch          { \p _ -> posify p $ GoTokSwitch }
+  type            { \p _ -> posify p $ GoTokType }
+  var             { \p _ -> posify p $ GoTokVar }
 -- END keywords
   @identifier     { \p s -> posify p $ GoTokId s }
 
