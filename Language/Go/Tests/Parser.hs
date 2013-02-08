@@ -49,6 +49,10 @@ testSwitch1 = testParse "test switch with empty case"
         GoDefault [GoStmtReturn []]
       ]
 
+testSwitch2 = testParse "test type switch"
+    goStatement "switch v.(type) {}" $
+    GoStmtTypeSwitch (GoCond Nothing (Just $ ident "v")) [] Nothing
+
 testSelect1 = testParse "test empty select"
     goStatement "select {}" $
     GoStmtSelect []
@@ -163,6 +167,7 @@ testsParser =
   , testBuiltin2
   , testConversion1
   , testSwitch1
+  , testSwitch2
   , testSelect1
   , testSelect2
   , testSelect3

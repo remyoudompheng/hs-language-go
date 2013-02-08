@@ -854,8 +854,8 @@ goIfStmt = do
 -- | Standard @IfStmt@
 --
 -- See also: SS. 11.8. Switch statements
-goSwitchStmt =  goExprSwitchStmt
-            <|> goTypeSwitchStmt
+goSwitchStmt = try goExprSwitchStmt
+           <|> goTypeSwitchStmt
 
 -- | Standard @ExprSwitchStmt@
 --
@@ -892,7 +892,7 @@ goTypeSwitchStmt = do
   st <- optionMaybe $ goSemi goSimple
   id <- optionMaybe $ goAfter goTokColonEq goIdentifier
   ga <- goTypeSwitchGuard st
-  cl <- goBrace $ many1 goTypeCaseClause
+  cl <- goBrace $ many goTypeCaseClause
   return $ GoStmtTypeSwitch ga cl id
 
 -- | Standard @TypeSwitchGuard@
