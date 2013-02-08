@@ -18,26 +18,32 @@ testParse desc parser text ref = TestLabel desc $ TestCase $ assertEqual desc wa
     where got = strerror $ goParseTestWith (do { p <- parser; optional goTokSemicolon; eof; return p }) text
           want = Right ref
 
+namedType :: String -> GoType
+namedType = GoTypeName Nothing . GoId
+
+ident :: String -> GoExpr
+ident s = GoPrim $ GoQual Nothing (GoId s)
+
 testImport1 = testParse "dot import"
     goImportDecl "import . \"os\"" $
     GoImportDecl [GoImpSpec GoImpDot "os"]
 
 testBuiltin1 = testParse "test builtin make"
     goBuiltinCall "make([]int, 4)" $
-    (GoMake (GoSliceType (GoTypeName [] (GoId "int"))) [GoPrim (GoLiteral (GoLitInt "4" 4))])
+    GoMake (GoSliceType (namedType "int")) [GoPrim $ GoLiteral $ GoLitInt "4" 4]
 
 testBuiltin2 = testParse "test builtin make as expr"
     goExpression "make([]int, 4)" $
-    GoPrim (GoMake (GoSliceType (GoTypeName [] (GoId "int"))) [GoPrim (GoLiteral (GoLitInt "4" 4))])
+    GoPrim (GoMake (GoSliceType $ namedType "int") [GoPrim $ GoLiteral $ GoLitInt "4" 4])
 
 testConversion1 = testParse "byte slice conversion"
     goExpression "[]byte(\"hello world\")" $
-    GoPrim $ GoCast (GoSliceType (GoTypeName [] (GoId "byte"))) (GoPrim $ GoLiteral $ GoLitStr "\"hello world\"" "hello world")
+    GoPrim $ GoCast (GoSliceType (namedType "byte")) (GoPrim $ GoLiteral $ GoLitStr "\"hello world\"" "hello world")
 
 testSwitch1 = testParse "test switch with empty case"
     goStatement "switch x { case 1: case 2: default: return; }" $
     GoStmtSwitch
-      (GoCond Nothing (Just (GoPrim (GoQual [] (GoId "x")))))
+      (GoCond Nothing (Just (GoPrim (GoQual Nothing (GoId "x")))))
       [ GoCase [GoPrim (GoLiteral (GoLitInt "1" 1))] []
       , GoCase [GoPrim (GoLiteral (GoLitInt "2" 2))] [],
         GoDefault [GoStmtReturn []]
@@ -49,21 +55,21 @@ testSelect1 = testParse "test empty select"
 
 testSelect2 = testParse "test select with empty case"
     goStatement "select { case <-ch: }" $
-    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "ch"))))] []]
+    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
 
 testSelect3 = testParse "test select with parentheses"
     goStatement "select { case (<-ch): }" $
-    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "ch"))))] []]
+    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
 
 testLiteral1 = testParse "empty composite literal"
     goCompositeLit "T{}" $
-    GoLitComp (GoTypeName [] (GoId "T")) (GoComp [])
+    GoLitComp (namedType "T") (GoComp [])
 
 testLiteral2 = testParse "non-empty composite literal as expression"
     goExpression "T{Field: value}" $
     GoPrim (GoLiteral (GoLitComp
-      (GoTypeName [] (GoId "T"))
-      (GoComp [GoElement (GoKeyField (GoId "Field")) (GoValueExpr (GoPrim (GoQual [] (GoId "value"))))])
+      (namedType "T")
+      (GoComp [GoElement (GoKeyField (GoId "Field")) (GoValueExpr (GoPrim (GoQual Nothing (GoId "value"))))])
     ))
 
 testLiteral3 = testParse "composite literal in statement"
@@ -71,51 +77,54 @@ testLiteral3 = testParse "composite literal in statement"
     GoStmtSimple $ GoSimpVar
       [GoId "a"]
       [GoPrim (GoLiteral (GoLitComp
-        (GoTypeName [] (GoId "T"))
-        (GoComp [GoElement (GoKeyField (GoId "Field")) (GoValueExpr (GoPrim (GoQual [] (GoId "value"))))])
+        (namedType "T")
+        (GoComp [GoElement (GoKeyField (GoId "Field")) (GoValueExpr (GoPrim (GoQual Nothing (GoId "value"))))])
       ))]
 
 testLiteral4 = testParse "map literal with composite keys"
     goCompositeLit "map[T]U{T{1, 2}: \"hello\"}" $
     GoLitComp
-      (GoMapType (typ "T") (typ "U"))
+      (GoMapType (namedType "T") (namedType "U"))
       (GoComp [
         GoElement
          (GoKeyIndex $ GoPrim $ GoLiteral $ GoLitComp
-           (typ "T")
+           (namedType "T")
            (GoComp [GoElement GoKeyNone (lit "1" 1),
                     GoElement GoKeyNone (lit "2" 2)])
          )
          (GoValueExpr $ GoPrim $ GoLiteral $ GoLitStr "\"hello\"" "hello")]
       )
   where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
-        typ s = GoTypeName [] (GoId s)
 
 testRecv1 = testParse "receive operator"
     goExpression "<-c" $
-    Go1Op (GoOp "<-") (GoPrim (GoQual [] (GoId "c")))
+    Go1Op (GoOp "<-") (GoPrim (GoQual Nothing (GoId "c")))
 
 testMethod1 = testParse "method call"
     goExpression "time.Now()" $
-    GoPrim $ GoCall (GoQual [GoId "time"] (GoId "Now")) [] False
+    GoPrim $ GoCall (GoQual (Just $ GoId "time") (GoId "Now")) [] False
 
 testMethod2 = testParse "method signature with anonymous receiver"
     goMethodDecl "func (T) Method ()" $
     GoMeth $ GoMethDecl
-      (GoRec False Nothing $ GoTypeName [] (GoId "T"))
+      (GoRec False Nothing $ GoTypeName Nothing (GoId "T"))
       (GoId "Method")
       (GoSig [] [])
       GoNoBlock
 
 testSelector1 = testParse "selector on index expression"
     goExpression "a[i].field" $
-    GoPrim (GoSelect (GoIndex (GoQual [] (GoId "a")) (GoPrim (GoQual [] (GoId "i")))) (GoId "field"))
+    GoPrim (GoSelect (GoIndex (GoQual Nothing (GoId "a")) (GoPrim (GoQual Nothing (GoId "i")))) (GoId "field"))
+
+testTypeAssert1 = testParse "type assertion"
+    goExpression "v.(T)" $
+    GoPrim (GoTA (GoQual Nothing (GoId "v")) (namedType "T"))
 
 testStructDecl1 = testParse "struct decl with embedded field"
     goType "struct { Field T; U }" $
     GoStructType
-      [ GoFieldType {getFieldTag = "", getFieldId = [GoId "Field"], getFieldType = GoTypeName [] (GoId "T")}
-      , GoFieldAnon {getFieldTag = "", getFieldPtr = False, getFieldType = GoTypeName [] (GoId "U")} 
+      [ GoFieldType {getFieldTag = "", getFieldId = [GoId "Field"], getFieldType = namedType "T"}
+      , GoFieldAnon {getFieldTag = "", getFieldPtr = False, getFieldType = namedType "U"} 
       ]
 
 testLabel1 = testParse "labelled statement"
@@ -143,6 +152,7 @@ testsParser =
   , testMethod1
   , testMethod2
   , testSelector1
+  , testTypeAssert1
   , testStructDecl1
   , testLabel1
   , testFor1

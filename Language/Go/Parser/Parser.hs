@@ -459,11 +459,12 @@ goBasicLit = try $ do
 --
 -- See also: SS. 10.2. Qualified identifiers
 goQualifiedIdent :: GoParser GoPrim
-goQualifiedIdent = do
-  ns <- sepBy1 goIdentifier goTokFullStop
-  let qual = init ns
-      name = last ns
-  return $ GoQual qual name
+goQualifiedIdent = try qualified <|> liftM (GoQual Nothing) goIdentifier
+  where qualified = do
+          qual <- goIdentifier
+          goTokFullStop
+          name <- goIdentifier
+          return $ GoQual (Just qual) name
 
 -- | Standard @CompositeLit@
 --

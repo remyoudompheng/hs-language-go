@@ -79,7 +79,7 @@ data GoParam = GoParam [GoId] GoType
                 deriving (Eq, Read, Show)
 
 -- GoType (= 'Type' = 'TypeLit' = 'LiteralType')
-data GoType = GoTypeName [GoId] GoId
+data GoType = GoTypeName (Maybe GoId) GoId
             | GoArrayType GoExpr GoType
             | GoChannelType GoChanKind GoType  -- only in Decls
             | GoElipsisType GoType  -- only in Literals
@@ -140,7 +140,7 @@ data GoExpr = GoPrim GoPrim           -- 'PrimaryExpr'
 
 -- GoPrimExpr (= 'PrimaryExpr')
 data GoPrim = GoLiteral GoLit         -- 'PrimaryExpr/Operand/Literal'
-            | GoQual  [GoId] GoId     -- 'PrimaryExpr/Operand/QualifiedIdent'
+            | GoQual (Maybe GoId) GoId -- 'PrimaryExpr/Operand/QualifiedIdent'
             | GoMethod GoRec GoId     -- 'PrimaryExpr/Operand/MethodExpr'
             | GoParen GoExpr          -- 'PrimaryExpr/Operand/MethodExpr'
             | GoCast GoType GoExpr    -- 'PrimaryExpr/Conversion'
