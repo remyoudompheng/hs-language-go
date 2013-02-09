@@ -499,7 +499,8 @@ goCompositeLit = do
 goArrayEllipsisType :: GoParser GoType
 goArrayEllipsisType = do
   goBracket goTokEllipsis
-  goType
+  t <- goType
+  return $ GoEllipsisType t
 
 -- | Standard @LiteralType@
 --
@@ -924,11 +925,13 @@ goForClause = do
 goRangeClause :: GoParser GoForClause
 goRangeClause = do
   k <- goExpression
-  v <- option [] (goTokComma >> liftM (replicate 1) goPrimaryExpr)
+  v <- optionMaybe (goTokComma >> goPrimaryExpr)
   p <- goAnyEqual
   goTokRange
   e <- goExpression
-  return $ GoForRange (k:v) e
+  return $ case v of
+    Nothing -> GoForRange [k] e
+    Just v  -> GoForRange [k,v] e
 
 -- Nonstandard
 goAnyEqual :: GoParser GoOp

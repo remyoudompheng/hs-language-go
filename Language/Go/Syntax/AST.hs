@@ -82,7 +82,7 @@ data GoParam = GoParam [GoId] GoType
 data GoType = GoTypeName (Maybe GoId) GoId
             | GoArrayType GoExpr GoType
             | GoChannelType GoChanKind GoType  -- only in Decls
-            | GoElipsisType GoType  -- only in Literals
+            | GoEllipsisType GoType  -- only in Literals
             | GoFunctionType GoSig
             | GoInterfaceType [GoMethSpec] -- only in Decls
             | GoMapType GoType GoType

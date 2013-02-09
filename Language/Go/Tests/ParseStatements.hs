@@ -71,6 +71,14 @@ testFor3 = testParse "empty for"
     goStatement "for true { ; ; }" $
     GoStmtFor (GoForWhile $ Just $ ident "true") (GoBlock [])
 
+testFor4 = testParse "range loop with blank"
+    goStatement "for _, order := range [...]Order{LSB, MSB} {}" $
+    GoStmtFor (GoForRange [ident "_", ident "order"] $
+      GoPrim $ GoLiteral $ GoLitComp (GoEllipsisType $ namedType "Order") $
+      GoComp [elem "LSB", elem "MSB"])
+      (GoBlock [])
+  where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
+
 testIf1 = testParse "if statement with init"
     goStatement "if v, ok := F(); ok {}" $
     GoStmtIf
@@ -134,6 +142,7 @@ testsParseStmts =
   , testFor1
   , testFor2
   , testFor3
+  , testFor4
   , testIf1
   , testIf2
   , testIf3
