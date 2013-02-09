@@ -99,6 +99,13 @@ testCall2 = testParse "call with comment (used to insert semicolon)"
    goExpression "f(a, b, c /* comment */)" $
    GoPrim $ GoCall (GoQual Nothing $ GoId "f") (map ident ["a", "b", "c"]) False
 
+testCall3 = testParseFail "call with multiple trailing commas"
+    goExpression "f(a,b,c,,)"
+
+testCall4 = testParse "call variadic with trailing comma after args"
+    goExpression "f(a,b,c...,)" $
+    GoPrim $ GoCall (GoQual Nothing $ GoId "f") (map ident ["a", "b", "c"]) True
+
 testMethod1 = testParse "method call"
     goExpression "time.Now()" $
     GoPrim $ GoCall (GoQual (Just $ GoId "time") (GoId "Now")) [] False
@@ -145,8 +152,10 @@ testsParser =
   , testLiteral4
   , testOp1
   , testOp2
-  -- , testCall1
+  , testCall1
   , testCall2
+  , testCall3
+  , testCall4
   , testMethod1
   , testMethod2
   , testSelector1

@@ -313,7 +313,13 @@ goIdentifierList = sepBy goIdentifier goTokComma
 --
 -- See also: SS. 9.5. Constant declarations
 goExpressionList :: GoParser [GoExpr]
-goExpressionList = sepBy goExpression goTokComma
+goExpressionList = try exprs <|> return []
+  where exprs = do
+         -- custom implementation of sepBy that doesn't
+         -- fail on [x0 comma ... xn comma y]
+         x <- goExpression
+         xs <- many $ try (goTokComma >> goExpression)
+         return (x:xs)
 
 -- | Nonstandard, includes @ConstSpec@, @VarSpec@
 --
@@ -649,6 +655,7 @@ goCall :: GoPrim -> GoParser GoPrim
 goCall ex = goParen $ do
   ar <- goExpressionList
   rs <- optionMaybe goTokEllipsis
+  optional goTokComma
   return $ GoCall ex ar (isJust rs)
 
 -- | Standard @Expression@
