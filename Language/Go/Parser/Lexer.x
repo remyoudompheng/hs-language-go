@@ -11,7 +11,7 @@ import Text.Parsec.Pos
 -- SS. 3.1. Characters
 @unicode_char   = [\x00-\x7F]|[\x80-\xFF]+
 @unicode_nobr   = [\x00-\x5C\x5E-\x7F]|[\x80-\xFF]+
-@unicode_nobq   = $printable # `
+@unicode_nobq   = [$printable $white] # `
 @unicode_nosq   = $printable # [\' \n \\]
 @unicode_nodq   = $printable # \"
 @unicode_letter = [A-Za-z] -- should be [\p{L}]
@@ -62,7 +62,7 @@ $add_op     = [\+\-\|\^]
 @oct_byte_value = \\($octal_digit){3}
 @little_u_value = \\u($hex_digit){4}
 @big_u_value    = \\U($hex_digit){8}
-@escaped_char   = \\[abfnrtv\`\'\"]
+@escaped_char   = \\[abfnrtv\`\'\"\\]
 @unicode_value  = (@unicode_nodq|@little_u_value|@big_u_value|@escaped_char)
 @byte_value     = (@oct_byte_value|@hex_byte_value)
 
@@ -70,7 +70,7 @@ $add_op     = [\+\-\|\^]
 @char_lit   = \'(@unicode_nosq|@little_u_value|@big_u_value|@escaped_char|@byte_value)\'
 
 -- SS. 4.11. String literals
-@raw_string_lit = \`(@unicode_nobq)*\`
+@raw_string_lit = \`(@unicode_nobq | \n)*\`
 @int_string_lit = \"(@unicode_value|@byte_value)*\"
 @string_lit = (@raw_string_lit|@int_string_lit)
 
