@@ -1,28 +1,15 @@
-module Language.Go.Tests.Parser where
-
-import Test.HUnit
-
-import Text.Parsec.Combinator (eof, optional)
-import Text.Parsec.Error
+module Language.Go.Tests.Parser (testsParser) where
 
 import Language.Go.Parser.Parser
-import Language.Go.Parser.Tokens
 import Language.Go.Syntax.AST
 
-strerror :: Either ParseError a -> Either String a
-strerror (Left err) = Left (show err)
-strerror (Right x) = Right x
+import Language.Go.Tests.Common
 
-testParse :: (Show a, Eq a) => String -> GoParser a -> String -> a -> Test
-testParse desc parser text ref = TestLabel desc $ TestCase $ assertEqual desc want got
-    where got = strerror $ goParseTestWith (do { p <- parser; optional goTokSemicolon; eof; return p }) text
-          want = Right ref
-
-namedType :: String -> GoType
-namedType = GoTypeName Nothing . GoId
-
-ident :: String -> GoExpr
-ident s = GoPrim $ GoQual Nothing (GoId s)
+-- begin debug
+-- import Debug.Trace
+-- import Text.Parsec.Prim
+-- import Control.Monad
+-- import Language.Go.Parser.Operators
 
 testImport1 = testParse "dot import"
     goImportDecl "import . \"os\"" $
@@ -39,31 +26,6 @@ testBuiltin2 = testParse "test builtin make as expr"
 testConversion1 = testParse "byte slice conversion"
     goExpression "[]byte(\"hello world\")" $
     GoPrim $ GoCast (GoSliceType (namedType "byte")) (GoPrim $ GoLiteral $ GoLitStr "\"hello world\"" "hello world")
-
-testSwitch1 = testParse "test switch with empty case"
-    goStatement "switch x { case 1: case 2: default: return; }" $
-    GoStmtSwitch
-      (GoCond Nothing (Just (GoPrim (GoQual Nothing (GoId "x")))))
-      [ GoCase [GoPrim (GoLiteral (GoLitInt "1" 1))] []
-      , GoCase [GoPrim (GoLiteral (GoLitInt "2" 2))] [],
-        GoDefault [GoStmtReturn []]
-      ]
-
-testSwitch2 = testParse "test type switch"
-    goStatement "switch v.(type) {}" $
-    GoStmtTypeSwitch (GoCond Nothing (Just $ ident "v")) [] Nothing
-
-testSelect1 = testParse "test empty select"
-    goStatement "select {}" $
-    GoStmtSelect []
-
-testSelect2 = testParse "test select with empty case"
-    goStatement "select { case <-ch: }" $
-    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
-
-testSelect3 = testParse "test select with parentheses"
-    goStatement "select { case (<-ch): }" $
-    GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
 
 testConst1 = testParse "raw string constant"
     goExpression "`hello`" $
@@ -116,6 +78,9 @@ testLiteral4 = testParse "map literal with composite keys"
       )
   where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
 
+testLiteral5 = testParseFail "composite literal is not simple"
+    goSimpleExpr "v {}"
+
 testOp1 = testParse "expression with operator"
     goExpression "!*p" $
     Go1Op (GoOp "!") $ Go1Op (GoOp "*") $ ident "p"
@@ -163,46 +128,11 @@ testIfaceDecl1 = testParse "interface decl with embedded qualified interface"
     goType "interface { io.Reader }" $
     GoInterfaceType [GoIfaceName (Just (GoId "io")) (GoId "Reader")]
 
-testLabel1 = testParse "labelled statement"
-    goStatement "label: return" $
-    GoStmtLabeled (GoId "label") (GoStmtReturn [])
-
-testFor1 = testParse "while true"
-    goStatement "for {}" $
-    GoStmtFor (GoForWhile Nothing) (GoBlock [])
-
--- testFor2 = testParse "for with parsing ambiguity"
---     goStatement "for a = a.prev; a.level > level; a = a.prev {}" $
---     GoStmtFor (GoForWhile Nothing) (GoBlock [])
-
-testIf1 = testParse "if statement with init"
-    goStatement "if v, ok := F(); ok {}" $
-    GoStmtIf
-      (GoCond (Just stmt) (Just $ ident "ok"))
-      (GoBlock [])
-      Nothing
-  where
-    stmt = GoSimpVar [GoId "v", GoId "ok"] [GoPrim (GoCall (GoQual Nothing (GoId "F")) [] False)]
-
-testIf2 = testParse "if statement with complex terms"
-    goStatement "if F() {}" $
-    GoStmtIf
-      (GoCond Nothing $ Just expr)
-      (GoBlock [])
-      Nothing
-  where
-    expr = GoPrim (GoCall (GoQual Nothing (GoId "F")) [] False)
-
 testsParser =
   [ testImport1
   , testBuiltin1
   , testBuiltin2
   , testConversion1
-  , testSwitch1
-  , testSwitch2
-  , testSelect1
-  , testSelect2
-  , testSelect3
   , testConst1
   , testConst2
   -- , testConst3
@@ -210,6 +140,7 @@ testsParser =
   , testLiteral2
   , testLiteral3
   , testLiteral4
+  , testLiteral5
   , testOp1
   , testOp2
   -- , testCall1
@@ -220,9 +151,4 @@ testsParser =
   , testTypeAssert1
   , testStructDecl1
   , testIfaceDecl1
-  , testLabel1
-  , testFor1
-  -- , testFor2
-  , testIf1
-  , testIf2
   ]
