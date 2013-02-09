@@ -103,7 +103,7 @@ tokens :-
   "="             { \p _ -> posify p $ GoTokEqual }
   ","             { \p _ -> posify p $ GoTokComma }
   "."             { \p _ -> posify p $ GoTokFullStop }
-  "..."           { \p _ -> posify p $ GoTokElipsis }
+  "..."           { \p _ -> posify p $ GoTokEllipsis }
   "_"             { \p _ -> posify p $ GoTokId "_" }
 
 -- BEGIN operators

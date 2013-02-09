@@ -94,7 +94,7 @@ data GoToken = GoTokNone
              | GoTokEqual     -- '='
              | GoTokComma     -- ','
              | GoTokFullStop  -- '.'
-             | GoTokElipsis   -- '...'
+             | GoTokEllipsis   -- '...'
 -- BEGIN operators
              | GoTokLOR       -- '||'
              | GoTokLAND      -- '&&'
@@ -243,7 +243,7 @@ goTokColonEq  = token $ GoTokColonEq   -- ':='
 goTokEqual    = token $ GoTokEqual     -- '='
 goTokComma    = token $ GoTokComma     -- ','
 goTokFullStop = token $ GoTokFullStop  -- '.'
-goTokElipsis  = token $ GoTokElipsis   -- '...'
+goTokEllipsis = token $ GoTokEllipsis  -- '...'
 
 goTokAsterisk = token $ GoTokAsterisk
 goTokArrow    = token $ GoTokArrow

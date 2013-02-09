@@ -187,7 +187,7 @@ goParameterDecl = (try goParameterDecl') <|> goParameterDecl'' where
     goParameterDecl' :: GoParser GoParam
     goParameterDecl' = do
       is <- option [] goIdentifierList
-      optional goTokElipsis
+      optional goTokEllipsis
       t <- goType
       return $ GoParam is t
     --  return $ flip map is (\i -> GoParam (Just i) t)
@@ -490,9 +490,9 @@ goCompositeLit = do
 -- This production represents the third part of the @LiteralType@ production.
 --
 -- See also: SS. 10.3. Composite literals
-goArrayElipsisType :: GoParser GoType
-goArrayElipsisType = do
-  goBracket goTokElipsis
+goArrayEllipsisType :: GoParser GoType
+goArrayEllipsisType = do
+  goBracket goTokEllipsis
   goType
 
 -- | Standard @LiteralType@
@@ -500,7 +500,7 @@ goArrayElipsisType = do
 -- See also: SS. 10.3. Composite literals
 goLiteralType :: GoParser GoType
 goLiteralType =  (try goArrayType)
-             <|> (try goArrayElipsisType)
+             <|> (try goArrayEllipsisType)
              <|> goSliceType
              <|> goStructType
              <|> goMapType
@@ -648,7 +648,7 @@ goTypeAssertion ex = do
 goCall :: GoPrim -> GoParser GoPrim
 goCall ex = goParen $ do
   ar <- goExpressionList
-  rs <- optionMaybe goTokElipsis
+  rs <- optionMaybe goTokEllipsis
   return $ GoCall ex ar (isJust rs)
 
 -- | Standard @Expression@
@@ -1142,4 +1142,4 @@ goBracket = between goTokLBracket goTokRBracket
 -- ChannelType
 -- FunctionType (available as FunctionLit)
 -- only in LiteralType:
--- goArrayElipsisType
+-- goArrayEllipsisType
