@@ -11,14 +11,20 @@ import Language.Go.Syntax.AST
 import Text.Parsec.String
 import Text.Parsec.Prim hiding (token)
 import qualified Text.Parsec.Prim as Prim
-import Text.Parsec.Pos (SourcePos)
+import Text.Parsec.Pos (SourcePos, SourceName)
+import Text.Parsec.Error (ParseError)
 import Text.Parsec.Combinator
 
 -- | GoTokener is the type used for all tokenizers
 -- type GoTokener = GenParser Char () [GoToken]
 
 -- | GoParser is the type used for all parsers
-type GoParser a = GenParser GoTokenPos () a
+type GoParser a = GenParser GoTokenPos GoParserState a
+
+data GoParserState = GoParserState { noComposite :: Bool }
+
+runGoParser :: GoParser a -> SourceName -> [GoTokenPos] -> Either ParseError a
+runGoParser p = runP p $ GoParserState { noComposite = False }
 
 -- | GoTokenPos encodes tokens and source positions
 data GoTokenPos = GoTokenPos !SourcePos !GoToken

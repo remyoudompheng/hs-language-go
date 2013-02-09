@@ -37,13 +37,13 @@ goParse filename s = goParseTokens filename $ goTokenize s
 
 -- | Parse Go Language token list into AST
 goParseTokens :: String -> [GoTokenPos] -> Either ParseError GoSource
-goParseTokens filename toks = parse goSource filename toks
+goParseTokens filename toks = runGoParser goSource filename toks
 
 goParseFileWith :: GoParser a -> String -> String -> Either ParseError a
-goParseFileWith start filename s = parse start filename (goTokenize s)
+goParseFileWith start filename s = runGoParser start filename (goTokenize s)
 
 goParseTestWith :: GoParser a -> String -> Either ParseError a
-goParseTestWith start s = parse start "" (goTokenize s)
+goParseTestWith start s = runGoParser start "" (goTokenize s)
 
 --
 --  Begin specification grammar
@@ -473,7 +473,12 @@ goQualifiedIdent = try qualified <|> liftM (GoQual Nothing) goIdentifier
 -- See also: SS. 10.3. Composite literals
 goCompositeLit :: GoParser GoLit
 goCompositeLit = do
+  st <- getState
   ty <- goLiteralType
+  -- FIXME: allow T{} when parenthesized.
+  case ty of
+    GoTypeName _ _ -> if noComposite st then fail "no T{} in condition" else return ()
+    _ -> return ()
   va <- goLiteralValue
   return $ GoLitComp ty va
 
@@ -569,9 +574,13 @@ goFuncLambda = do
 -- See also: SS. 10.5. Primary expressions
 
 -- | Nonstandard primary expressions (self-contained)
-goPrimary :: GoParser GoPrim -> GoParser GoExpr
-goPrimary prim = do
-    ex <- prim
+goPrimaryExpr :: GoParser GoExpr
+goPrimaryExpr = do
+    -- Try builtin call first because the prefix looks like an
+    -- identifier.
+    -- goConversion only matches for unnamed types (names match
+    -- goOperand).
+    ex <- (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
     let complex prefix = (try $ goIndex prefix)
                   <|> (try $ goSlice prefix)
                   <|> try (goTypeAssertion prefix)
@@ -582,21 +591,6 @@ goPrimary prim = do
         veryComplex vex) <|> return prefix
     pr <- veryComplex ex
     return $ GoPrim pr
-
--- | Expressions that can be used in an if/for/switch clause.
--- Composite literals of the form T{...} cannot appear at top level
--- due to a parsing ambiguity.
-goSimpleExpr :: GoParser GoExpr
-goSimpleExpr = goExpressionSkel prim
-            <?> "expression"
-  where 
-    -- FIXME: should parse general expressions here while still
-    -- refusing compositel literals.
-    goSimpleOperand = try (liftM GoLiteral goBasicLit)
-                      <|> try goQualifiedIdent
-                      <|> try goMethodExpr
-                      <|> liftM GoParen (goParen goExpression)
-    prim = (try goBuiltinCall) <|> (try goSimpleOperand) <|> (try goConversion)
 
 -- | Standard @Selector@
 --
@@ -668,32 +662,16 @@ goCall ex = do
 --
 -- See also: SS. 10.12. Operators
 goExpression :: GoParser GoExpr
-goExpression = goExpressionSkel prim
+goExpression = goOpExpr goUnaryExpr
             <?> "expression"
-  where
-    -- Try builtin call first because the prefix looks like an
-    -- identifier.
-    -- goConversion only matches for unnamed types (names match
-    -- goOperand).
-    prim = (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
 
-goPrimaryExpr :: GoParser GoExpr
-goPrimaryExpr = goPrimary prim
-  where prim = (try goBuiltinCall) <|> (try goOperand) <|> (try goConversion)
-
--- | goExpressionSkel creates an expression parser
--- from a primary expression parser. It is shared between
--- goExpression and goSimpleExpression.
---
--- Parenthesized subexpression can contain arbitrary terms.
-goExpressionSkel :: GoParser GoPrim -> GoParser GoExpr
-goExpressionSkel prim = goOpExpr unaryExpr
-  where unaryExpr = try unaryOpExpr <|> primaryExpr
+goUnaryExpr :: GoParser GoExpr
+goUnaryExpr = unaryExpr
+  where unaryExpr = try unaryOpExpr <|> goPrimaryExpr
         unaryOpExpr = do
           op <- goUnaryOp
           expr <- goParen goExpression <|> unaryExpr
           return $ Go1Op op expr
-        primaryExpr = goPrimary prim
 
 -- | Standard @MethodExpr@
 --
@@ -806,13 +784,11 @@ goSendStmt = do
 -- See also: SS. 11.5. IncDec statements
 goIncDecStmt :: GoParser GoSimp
 goIncDecStmt = try $ do
-  ex <- goPrimaryExpr -- goExpression
+  ex <- goUnaryExpr -- goExpression
   (GoTokenPos _ op) <- anyToken
   case op of
     GoTokInc -> return $ GoSimpInc ex
     GoTokDec -> return $ GoSimpDec ex
---    GoOp"++" -> return $ GoSimpInc ex
---    GoOp"--" -> return $ GoSimpDec ex
     _ -> fail "IncDecStmt What?"
 
 -- | Standard @Assignment@
@@ -825,17 +801,32 @@ goAssignment = do
   rv <- goExpressionList
   return $ GoSimpAsn lv op rv
 
+goNoComposite :: GoParser a -> GoParser a
+goNoComposite p = do
+  putState $ GoParserState { noComposite = True }
+  x <- p
+  putState $ GoParserState { noComposite = False }
+  return x
+
+goCond :: GoParser GoCond
+goCond = goNoComposite $ do
+  st <- optionMaybe (goSemi goSimple)
+  ex <- optionMaybe goExpression
+  return $ GoCond st ex
+
 -- | Standard @IfStmt@
 --
 -- See also: SS. 11.7. If statements
 goIfStmt :: GoParser GoStmt
 goIfStmt = do
   goTokIf
-  s <- optionMaybe (goSemi goSimple)
-  c <- goSimpleExpr
+  cond <- goCond
+  case cond of
+     GoCond _ Nothing -> fail "missing condition in if"
+     _ -> return ()
   b <- goBlock
   e <- optionMaybe (goTokElse >> goStatement)
-  return $ GoStmtIf (GoCond s (Just c)) b e
+  return $ GoStmtIf cond b e
 
 -- | Standard @IfStmt@
 --
@@ -849,10 +840,9 @@ goSwitchStmt = try goExprSwitchStmt
 goExprSwitchStmt :: GoParser GoStmt
 goExprSwitchStmt = do
   goTokSwitch
-  st <- optionMaybe (goSemi goSimple)
-  ex <- optionMaybe goExpression
-  cl <- goBrace $ many1 goExprCaseClause
-  return $ GoStmtSwitch (GoCond st ex) cl
+  cond <- goCond
+  cl <- goBrace $ many goExprCaseClause
+  return $ GoStmtSwitch cond cl
 
 -- | Standard @ExprCaseClause@
 --
