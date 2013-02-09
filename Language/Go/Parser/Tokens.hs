@@ -21,10 +21,22 @@ import Text.Parsec.Combinator
 -- | GoParser is the type used for all parsers
 type GoParser a = GenParser GoTokenPos GoParserState a
 
-data GoParserState = GoParserState { noComposite :: Bool }
+data GoParserState = GoParserState { noComposite :: Bool, parenDepth :: Int }
 
 runGoParser :: GoParser a -> SourceName -> [GoTokenPos] -> Either ParseError a
-runGoParser p = runP p $ GoParserState { noComposite = False }
+runGoParser p = runP p $ GoParserState { noComposite = False, parenDepth = 0 }
+
+enterParen :: GoParser ()
+enterParen = do
+  st <- getState
+  putState $ st { parenDepth = (parenDepth st) + 1 }
+
+exitParen :: GoParser ()
+exitParen = do
+  st <- getState
+  let newst = st { parenDepth = (parenDepth st) - 1 }
+  if parenDepth newst < 0 then fail "negative paren depth" else return ()
+  putState newst
 
 -- | GoTokenPos encodes tokens and source positions
 data GoTokenPos = GoTokenPos !SourcePos !GoToken

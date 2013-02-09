@@ -480,7 +480,7 @@ goCompositeLit = do
   ty <- goLiteralType
   -- FIXME: allow T{} when parenthesized.
   case ty of
-    GoTypeName _ _ -> if noComposite st then fail "no T{} in condition" else return ()
+    GoTypeName _ _ -> if noComposite st && parenDepth st == 0 then fail "no T{} in condition" else return ()
     _ -> return ()
   va <- goLiteralValue
   return $ GoLitComp ty va
@@ -646,11 +646,9 @@ goTypeAssertion ex = do
 --
 -- See also: SS. 10.5. Primary expressions, 10.10. Calls
 goCall :: GoPrim -> GoParser GoPrim
-goCall ex = do
-  goTokLParen
+goCall ex = goParen $ do
   ar <- goExpressionList
   rs <- optionMaybe goTokElipsis
-  goTokRParen
   return $ GoCall ex ar (isJust rs)
 
 -- | Standard @Expression@
@@ -798,9 +796,10 @@ goAssignment = do
 
 goNoComposite :: GoParser a -> GoParser a
 goNoComposite p = do
-  putState $ GoParserState { noComposite = True }
+  st <- getState -- save state
+  putState $ GoParserState { noComposite = True, parenDepth = 0 }
   x <- p
-  putState $ GoParserState { noComposite = False }
+  putState st -- restore state
   return x
 
 goCond :: GoParser GoCond
@@ -1124,7 +1123,14 @@ goString = do
     (GoTokStr rep uni) -> return uni
     _ -> fail "String: what?"
 
-goParen = between goTokLParen goTokRParen
+goParen p = do
+  goTokLParen
+  enterParen
+  x <- p
+  exitParen
+  goTokRParen
+  return x
+
 goBrace = between goTokLBrace goTokRBrace
 goBracket = between goTokLBracket goTokRBracket
 

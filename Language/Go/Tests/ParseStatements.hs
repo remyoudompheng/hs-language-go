@@ -92,6 +92,33 @@ testIf2 = testParse "if statement with complex terms"
 testIf3 = testParseFail "if statement without condition"
     goStatement "if x := 0; {}"
 
+testIf4 = testParse "if stmt with composite literal"
+    goStatement "if l != (two{40, 50}) { return }" $
+    GoStmtIf
+      (GoCond Nothing (Just (Go2Op (GoOp "!=")
+        (ident "l")
+        (GoPrim $ GoParen $ GoPrim $ GoLiteral $ GoLitComp
+          (GoTypeName Nothing (GoId "two"))
+          (GoComp [lit 40, lit 50])
+        ))))
+      (GoBlock [GoStmtReturn []])
+      Nothing
+  where lit n = GoElement GoKeyNone $ GoValueExpr $ GoPrim $ GoLiteral $ GoLitInt (show n) n
+
+testIf5 = testParse "if stmt with composite literal in call"
+    goStatement "if l(two{40, 50}) { return }" $
+    GoStmtIf
+      (GoCond Nothing (Just $ GoPrim $ GoCall
+        (GoQual Nothing (GoId "l"))
+        [GoPrim $ GoLiteral $ GoLitComp
+          (GoTypeName Nothing (GoId "two"))
+          (GoComp [lit 40, lit 50])
+        ] False))
+      (GoBlock [GoStmtReturn []])
+      Nothing
+  where lit n = GoElement GoKeyNone $ GoValueExpr $ GoPrim $ GoLiteral $ GoLitInt (show n) n
+
+
 testsParseStmts =
   [ testSwitch1
   , testSwitch2
@@ -110,4 +137,6 @@ testsParseStmts =
   , testIf1
   , testIf2
   , testIf3
+  , testIf4
+  , testIf5
   ]
