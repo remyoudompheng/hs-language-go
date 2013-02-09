@@ -59,9 +59,17 @@ testFor1 = testParse "while true"
     goStatement "for {}" $
     GoStmtFor (GoForWhile Nothing) (GoBlock [])
 
--- testFor2 = testParse "for with parsing ambiguity"
---     goStatement "for a = a.prev; a.level > level; a = a.prev {}" $
---     GoStmtFor (GoForWhile Nothing) (GoBlock [])
+testFor2 = testParse "for with parsing ambiguity"
+    goStatement "for a = a.prev; a.level > level; a = a.prev {}" $
+    GoStmtFor (GoForThree
+      (GoSimpAsn [ident "a"] (GoOp "=") [GoPrim $ GoQual (Just (GoId "a")) (GoId "prev")])
+      (Just (Go2Op (GoOp ">") (GoPrim (GoQual (Just $ GoId "a") (GoId "level"))) (ident "level")))
+      (GoSimpAsn [ident "a"] (GoOp "=") [GoPrim (GoQual (Just (GoId "a")) (GoId "prev"))])
+    ) (GoBlock [])
+
+testFor3 = testParse "empty for"
+    goStatement "for true { ; ; }" $
+    GoStmtFor (GoForWhile $ Just $ ident "true") (GoBlock [])
 
 testIf1 = testParse "if statement with init"
     goStatement "if v, ok := F(); ok {}" $
@@ -97,7 +105,8 @@ testsParseStmts =
   , testPostfix1
   , testLabel1
   , testFor1
-  -- , testFor2
+  , testFor2
+  , testFor3
   , testIf1
   , testIf2
   , testIf3

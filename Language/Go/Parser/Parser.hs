@@ -13,7 +13,8 @@ import Language.Go.Parser.Lexer (alexScanTokens)
 import Language.Go.Syntax.AST
 
 import Control.Monad
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, catMaybes)
+
 import Text.Parsec.Prim hiding (token)
 import Text.Parsec.Error (ParseError)
 import Text.Parsec.Combinator
@@ -251,11 +252,13 @@ goChannelQuip =  do goTokArrow ; goTokChan ; return GoIChan         -- 1=RecvDir
 --
 -- See also: SS. 8. Blocks
 goBlock :: GoParser GoBlock
-goBlock =  liftM GoBlock $ goBlockish goAnyStatement
+goBlock = do liftM GoBlock $ goBlockish goAnyStatement
 
 -- | Nonstandard
 goBlockish :: GoParser a -> GoParser [a]
-goBlockish p = goBrace $ sepEndBy p goTokSemicolon
+goBlockish p = goBrace $ do
+  lines <- sepEndBy (optionMaybe p) goTokSemicolon
+  return $ catMaybes lines
 
 -- | Standard @Declaration@
 --
@@ -670,7 +673,7 @@ goUnaryExpr = unaryExpr
   where unaryExpr = try unaryOpExpr <|> goPrimaryExpr
         unaryOpExpr = do
           op <- goUnaryOp
-          expr <- goParen goExpression <|> unaryExpr
+          expr <- unaryExpr
           return $ Go1Op op expr
 
 -- | Standard @MethodExpr@
@@ -733,15 +736,7 @@ goStatement =  (liftM GoStmtDecl goDeclaration)   -- 'Statement/Declaration'
 -- | Nonstandard, TODO: remove this
 goAnyStatement :: GoParser GoStmt
 goAnyStatement =  goStatement
---            <|> goAnyStmt
               <?> "statement within a block"
-
--- | Nonstandard
---goAnyStmt :: GoParser GoStmt
---goAnyStmt = do
---  manyTill anyToken goTokSemicolon
-----  fail "could not recognize statement"
---  goEmptyStmt
 
 -- | Nonstandard simple statements (self-contained)
 --
@@ -901,7 +896,7 @@ goTypeList = sepBy1 goType goTokComma
 -- See also: SS. 11.9. For statements
 goForStmt = do
   goTokFor
-  h <- (try goForClause <|> try goRangeClause <|> goCondition)
+  h <- goNoComposite (try goForClause <|> try goRangeClause <|> goCondition)
   b <- goBlock
   return $ GoStmtFor h b
 
