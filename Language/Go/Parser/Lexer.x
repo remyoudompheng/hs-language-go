@@ -90,21 +90,21 @@ tokens :-
   @char_lit       { \p s -> posify p $ tokenFromChar s }
   @raw_string_lit { \p s -> posify p $ tokenFromRawStr s }
   @int_string_lit { \p s -> posify p $ tokenFromString s }
-  "("             { \p s -> posify p $ GoTokLParen }
-  ")"             { \p s -> posify p $ GoTokRParen }
-  "{"             { \p s -> posify p $ GoTokLBrace }
-  "}"             { \p s -> posify p $ GoTokRBrace }
-  "["             { \p s -> posify p $ GoTokLBracket }
-  "]"             { \p s -> posify p $ GoTokRBracket }
+  "("             { \p _ -> posify p $ GoTokLParen }
+  ")"             { \p _ -> posify p $ GoTokRParen }
+  "{"             { \p _ -> posify p $ GoTokLBrace }
+  "}"             { \p _ -> posify p $ GoTokRBrace }
+  "["             { \p _ -> posify p $ GoTokLBracket }
+  "]"             { \p _ -> posify p $ GoTokRBracket }
 
-  ";"             { \p s -> posify p $ GoTokSemicolon }
-  ":"             { \p s -> posify p $ GoTokColon }
-  ":="            { \p s -> posify p $ GoTokColonEq }
-  "="             { \p s -> posify p $ GoTokEqual }
-  ","             { \p s -> posify p $ GoTokComma }
-  "."             { \p s -> posify p $ GoTokFullStop }
-  "..."           { \p s -> posify p $ GoTokElipsis }
-  "_"             { \p s -> posify p $ GoTokId "_" }
+  ";"             { \p _ -> posify p $ GoTokSemicolon }
+  ":"             { \p _ -> posify p $ GoTokColon }
+  ":="            { \p _ -> posify p $ GoTokColonEq }
+  "="             { \p _ -> posify p $ GoTokEqual }
+  ","             { \p _ -> posify p $ GoTokComma }
+  "."             { \p _ -> posify p $ GoTokFullStop }
+  "..."           { \p _ -> posify p $ GoTokElipsis }
+  "_"             { \p _ -> posify p $ GoTokId "_" }
 
 -- BEGIN operators
   "||"            { \p _ -> posify p $ GoTokLOR }
