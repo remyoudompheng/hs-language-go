@@ -83,6 +83,13 @@ testLiteral4 = testParse "map literal with composite keys"
       )
   where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
 
+testLiteral5 = testParse "array literal with abridged syntax"
+    goCompositeLit "[]T{{a, b}, {c, d},}" $
+    GoLitComp (GoSliceType $ namedType "T")
+      (GoComp [ GoElement GoKeyNone (GoValueComp (GoComp [elem "a", elem "b"]))
+              , GoElement GoKeyNone (GoValueComp (GoComp [elem "c", elem "d"])) ])
+  where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
+
 testOp1 = testParse "expression with operator"
     goExpression "!*p" $
     Go1Op (GoOp "!") $ Go1Op (GoOp "*") $ ident "p"
@@ -150,6 +157,7 @@ testsParser =
   , testLiteral2
   , testLiteral3
   , testLiteral4
+  , testLiteral5
   , testOp1
   , testOp2
   , testCall1

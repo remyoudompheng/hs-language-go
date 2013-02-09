@@ -126,6 +126,15 @@ testIf5 = testParse "if stmt with composite literal in call"
       Nothing
   where lit n = GoElement GoKeyNone $ GoValueExpr $ GoPrim $ GoLiteral $ GoLitInt (show n) n
 
+testIf6 = testParse "if stmt with composite lieral as index"
+    goStatement "if allowedErrors[osPkg{GOOS, pkg}] { continue }" $
+    GoStmtIf (GoCond Nothing (Just
+      (GoPrim (GoIndex
+        (GoQual Nothing (GoId "allowedErrors"))
+        (GoPrim $ GoLiteral $ GoLitComp (namedType "osPkg") (GoComp [elem "GOOS", elem "pkg"]))
+      ))))
+      (GoBlock [GoStmtContinue Nothing]) Nothing
+  where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
 
 testsParseStmts =
   [ testSwitch1
@@ -148,4 +157,5 @@ testsParseStmts =
   , testIf3
   , testIf4
   , testIf5
+  , testIf6
   ]

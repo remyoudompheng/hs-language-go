@@ -617,7 +617,9 @@ goSelector ex = do
 goIndex :: GoPrim -> GoParser GoPrim
 goIndex ex = do
   goTokLBracket
+  enterParen
   ix <- goExpression
+  exitParen
   goTokRBracket
   return $ GoIndex ex ix
 
