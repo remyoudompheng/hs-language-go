@@ -13,7 +13,7 @@ import Text.Parsec.Pos
 @unicode_nobr   = [\x00-\x5C\x5E-\x7F]|[\x80-\xFF]+
 @unicode_nobq   = [$printable $white] # `
 @unicode_nosq   = $printable # [\' \n \\]
-@unicode_nodq   = $printable # \"
+@unicode_nodq   = $printable # [\" \n \\]
 @unicode_letter = [A-Za-z] -- should be [\p{L}]
 @unicode_digit  = [0-9]    -- should be [\p{N}]
 

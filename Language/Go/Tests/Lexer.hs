@@ -26,8 +26,28 @@ testCharLit1 = testLex "rune literal for backslash"
   [ GoTokChar (Just "'\\\\'") '\\'
   , GoTokSemicolon]
 
+testString1 = testLex "string with backslash"
+  "\"\\\\\""
+  [ GoTokStr (Just "\"\\\\\"") "\\\\" -- FIXME: only one \
+  , GoTokSemicolon]
+
+testString2 = testLex "long string with backslash"
+  "{\"\\\\\", \"a\", false, ErrBadPattern},"
+  [ GoTokLBrace
+  , GoTokStr (Just "\"\\\\\"") "\\\\" -- FIXME
+  , GoTokComma,GoTokStr (Just "\"a\"") "a"
+  , GoTokComma
+  , GoTokId "false"
+  , GoTokComma
+  , GoTokId "ErrBadPattern"
+  , GoTokRBrace
+  , GoTokComma
+  ]
+
 testsLexer =
   [ testRawString1
   , testRawString2
   , testCharLit1
+  , testString1
+  , testString2
   ]
