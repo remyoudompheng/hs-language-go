@@ -6,7 +6,10 @@
 -- x
 module Language.Go.Parser.Tokens where
 
+import Numeric (readHex)
 import Data.Maybe (mapMaybe)
+import Data.Char (chr)
+
 import Language.Go.Syntax.AST
 import Text.Parsec.String
 import Text.Parsec.Prim hiding (token)
@@ -124,16 +127,14 @@ data GoToken = GoTokNone
              | GoTokId String
              | GoTokOp String -- future extensions
 -- END names
+             | GoTokInvalid String
                deriving (Eq, Read, Show)
 -- Data, Typeable
 
-tokenSimplify :: (Int, Int) -> String -> String
-tokenSimplify (n, m) s = map (s!!) [n..(length s)-m-1]
-
 -- False=singleline True=multiline
 tokenFromComment :: Bool -> String -> GoToken
-tokenFromComment False s = GoTokComment False $ tokenSimplify (2, 1) s
-tokenFromComment True  s = GoTokComment True  $ tokenSimplify (2, 2) s
+tokenFromComment False s = GoTokComment False $ drop 2 $ init s -- strip // and \n
+tokenFromComment True  s = GoTokComment True  $ drop 2 $ init $ init s -- strip /* and */
 
 tokenFromInt :: String -> GoToken
 tokenFromInt s = GoTokInt (Just s) $ ((read s) :: Integer)
@@ -145,17 +146,58 @@ tokenFromImag :: String -> GoToken
 tokenFromImag s = GoTokImag (Just s) $ (read $ init s)
 
 tokenFromRawStr :: String -> GoToken
-tokenFromRawStr s = GoTokStr (Just s) $ tokenSimplify (1, 1) s
+tokenFromRawStr s = GoTokStr (Just s) (init $ tail s)
 
--- TODO: process \u#### and stuff
 tokenFromString :: String -> GoToken
-tokenFromString s = GoTokStr (Just s) $ tokenSimplify (1, 1) s
+tokenFromString s = case unquoteString $ init $ tail s of
+                      Just q -> GoTokStr (Just s) q
+                      Nothing -> GoTokInvalid s
 
+-- | @tokenFromChar c@ unquotes the Go representation of a single
+-- character literal, including the single quotes.
 tokenFromChar :: String -> GoToken
-tokenFromChar s = GoTokChar (Just s) (s!!1)
+tokenFromChar s =
+  case c of
+    Just c  -> GoTokChar (Just s) c
+    Nothing -> GoTokInvalid s
+  where c = unquoteChar $ init $ tail s
 
+unquoteChar :: String -> Maybe Char
+unquoteChar ['\\', c] = case c of
+  'a'  -> Just '\a'
+  'b'  -> Just '\b'
+  'f'  -> Just '\f'
+  'n'  -> Just '\n'
+  'r'  -> Just '\r'
+  't'  -> Just '\t'
+  'v'  -> Just '\v'
+  '\'' -> Just '\''
+  '\"' -> Just '\"'
+  '\\' -> Just '\\'
+  _    -> Nothing
+unquoteChar s = case s of
+  ['\\','x', a, b] -> hex [a, b]
+  ['\\', 'u', a, b, c, d] -> hex [a,b,c,d]
+  ['\\', 'U', a, b, c, d, e, f, g, h] -> hex [a,b,c,d,e,f,g,h]
+  [c] -> Just c
+  _ -> Nothing
+ where hex s = case readHex s of
+                 ((n, _):ns) -> Just $ chr n
+                 _ -> Nothing
 
--- tokens
+unquoteString :: String -> Maybe String
+unquoteString s = fmap reverse v
+  where (_, v) = unquote s (Just "")
+        unquote :: String -> Maybe String -> (String, Maybe String)
+        unquote "" accum = ("", accum)
+        unquote s Nothing = (s, Nothing)
+        unquote s (Just accum) = case c of Just c -> unquote s' $ Just (c:accum); Nothing -> (s, Nothing)
+         where (c, s') = case s of
+                 ('\\':'x':_) -> (unquoteChar $ take 4 s, drop 4 s)
+                 ('\\':'u':_) -> (unquoteChar $ take 6 s, drop 6 s)
+                 ('\\':'U':_) -> (unquoteChar $ take 10 s, drop 10 s)
+                 ('\\':_)     -> (unquoteChar $ take 2 s, drop 2 s)
+                 (c:ss)        -> (Just c, ss)
 
 tokenEq :: GoToken -> GoToken -> Bool
 tokenEq (GoTokComment _ _) (GoTokComment _ _) = True

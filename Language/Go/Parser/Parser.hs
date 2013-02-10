@@ -1146,7 +1146,6 @@ goParen p = do
 goBrace = between goTokLBrace goTokRBrace
 goBracket = between goTokLBracket goTokRBracket
 
-
 -- parsers
 -- only in TypeLit:
 -- Pointer

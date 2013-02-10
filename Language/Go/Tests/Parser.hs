@@ -32,22 +32,6 @@ testConversion2 = testParse "conversion to pointer"
     Go1Op (GoOp "*") (GoPrim $ GoCall (GoParen $ Go1Op (GoOp "*") $ GoPrim unsafeptr) [GoPrim (GoCall unsafeptr [Go1Op (GoOp "&") (ident "fn")] False)] False)
   where unsafeptr = GoQual (Just $ GoId "unsafe") (GoId "Pointer")
 
-testConst1 = testParse "raw string constant"
-    goExpression "`hello`" $
-    GoPrim $ GoLiteral $ GoLitStr "`hello`" "hello"
-
-testConst2 = testParse "rune literal of backquote"
-    goExpression "'`'" $
-    GoPrim $ GoLiteral $ GoLitChar "'`'" '`'
-
--- testConst3 = testParse "rune literal of single quote"
---     goExpression "'\\''" $
---     GoPrim $ GoLiteral $ GoLitChar "'\\''" '\''
-
-testConst4 = testParse "rune literal of backslash"
-    goExpression "'\\\\'" $
-    GoPrim $ GoLiteral $ GoLitChar "'\\\\'" '\\'
-
 testLiteral1 = testParse "empty composite literal"
     goCompositeLit "T{}" $
     GoLitComp (namedType "T") (GoComp [])
@@ -150,9 +134,6 @@ testsParser =
   , testBuiltin2
   , testConversion1
   , testConversion2
-  , testConst1
-  , testConst2
-  -- , testConst3
   , testLiteral1
   , testLiteral2
   , testLiteral3

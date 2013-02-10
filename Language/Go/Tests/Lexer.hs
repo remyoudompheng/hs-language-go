@@ -7,7 +7,7 @@ import Language.Go.Parser.Parser (goTokenize)
 import Language.Go.Parser.Tokens
 
 testLex :: String -> String -> [GoToken] -> Test
-testLex desc text ref = TestLabel desc $ TestCase $ assertEqual desc toks ref
+testLex desc text ref = TestLabel desc $ TestCase $ assertEqual desc ref toks
   where toks = map strip $ goTokenize text
         strip (GoTokenPos _ tok) = tok
 
@@ -26,15 +26,25 @@ testCharLit1 = testLex "rune literal for backslash"
   [ GoTokChar (Just "'\\\\'") '\\'
   , GoTokSemicolon]
 
+testCharLit2 = testLex "rune literal for newline"
+  "'\\n'"
+  [ GoTokChar (Just "'\\n'") '\n'
+  , GoTokSemicolon]
+
+testCharLit3 = testLex "rune literal for e-acute"
+  "'é'"
+  [ GoTokChar (Just "'é'") 'é'
+  , GoTokSemicolon]
+
 testString1 = testLex "string with backslash"
   "\"\\\\\""
-  [ GoTokStr (Just "\"\\\\\"") "\\\\" -- FIXME: only one \
+  [ GoTokStr (Just "\"\\\\\"") "\\"
   , GoTokSemicolon]
 
 testString2 = testLex "long string with backslash"
   "{\"\\\\\", \"a\", false, ErrBadPattern},"
   [ GoTokLBrace
-  , GoTokStr (Just "\"\\\\\"") "\\\\" -- FIXME
+  , GoTokStr (Just "\"\\\\\"") "\\"
   , GoTokComma,GoTokStr (Just "\"a\"") "a"
   , GoTokComma
   , GoTokId "false"
@@ -48,6 +58,8 @@ testsLexer =
   [ testRawString1
   , testRawString2
   , testCharLit1
+  , testCharLit2
+  , testCharLit3
   , testString1
   , testString2
   ]

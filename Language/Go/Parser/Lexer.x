@@ -62,7 +62,7 @@ $add_op     = [\+\-\|\^]
 @oct_byte_value = \\($octal_digit){3}
 @little_u_value = \\u($hex_digit){4}
 @big_u_value    = \\U($hex_digit){8}
-@escaped_char   = \\[abfnrtv\`\'\"\\]
+@escaped_char   = \\[abfnrtv\'\"\\]
 @unicode_value  = (@unicode_nodq|@little_u_value|@big_u_value|@escaped_char)
 @byte_value     = (@oct_byte_value|@hex_byte_value)
 
