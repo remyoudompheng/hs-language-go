@@ -9,12 +9,10 @@ import Text.Parsec.Pos
 %wrapper "posn"
 
 -- SS. 3.1. Characters
-@unicode_char   = [\x00-\x7F]|[\x80-\xFF]+
-@unicode_nobr   = [\x00-\x5C\x5E-\x7F]|[\x80-\xFF]+
 @unicode_nobq   = [$printable $white] # `
-@unicode_nosq   = $printable # [\' \n \\]
-@unicode_nodq   = $printable # [\" \n \\]
-@unicode_letter = [A-Za-z] -- should be [\p{L}]
+@unicode_nosq   = [$printable \t] # [\' \n \\]
+@unicode_nodq   = [$printable \t] # [\" \n \\]
+@unicode_letter = [A-Za-z] | ($printable # [\x00-\x7f \ ]) -- should be [\p{L}]
 @unicode_digit  = [0-9]    -- should be [\p{N}]
 
 -- SS. 3.2 Letters and digits

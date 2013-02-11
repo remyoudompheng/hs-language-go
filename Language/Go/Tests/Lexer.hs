@@ -36,6 +36,11 @@ testCharLit3 = testLex "rune literal for e-acute"
   [ GoTokChar (Just "'é'") 'é'
   , GoTokSemicolon]
 
+testCharLit4 = testLex "rune literal with octal escaping"
+  "'\\377'"
+  [ GoTokChar (Just "'\\377'") '\xff'
+  , GoTokSemicolon]
+
 testString1 = testLex "string with backslash"
   "\"\\\\\""
   [ GoTokStr (Just "\"\\\\\"") "\\"
@@ -54,12 +59,34 @@ testString2 = testLex "long string with backslash"
   , GoTokComma
   ]
 
+testString3 = testLex "string with tab"
+  "\"\t\""
+  [ GoTokStr (Just "\"\t\"") "\t"
+  , GoTokSemicolon]
+
+testString4 = testLex "string literal with octal escaping"
+  "\"\\377\""
+  [ GoTokStr (Just "\"\\377\"") "\xff"
+  , GoTokSemicolon]
+
+testId1 = testLex "non-ASCII identifier"
+  "α := 2"
+  [ GoTokId "α"
+  , GoTokColonEq
+  , GoTokInt (Just "2") 2
+  , GoTokSemicolon
+  ]
+
 testsLexer =
   [ testRawString1
   , testRawString2
   , testCharLit1
   , testCharLit2
   , testCharLit3
+  , testCharLit4
   , testString1
   , testString2
+  , testString3
+  , testString4
+  , testId1
   ]

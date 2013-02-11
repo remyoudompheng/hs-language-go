@@ -6,9 +6,9 @@
 -- x
 module Language.Go.Parser.Tokens where
 
-import Numeric (readHex)
+import Numeric (readHex, readOct)
 import Data.Maybe (mapMaybe)
-import Data.Char (chr)
+import Data.Char (chr, isOctDigit)
 
 import Language.Go.Syntax.AST
 import Text.Parsec.String
@@ -179,9 +179,13 @@ unquoteChar s = case s of
   ['\\','x', a, b] -> hex [a, b]
   ['\\', 'u', a, b, c, d] -> hex [a,b,c,d]
   ['\\', 'U', a, b, c, d, e, f, g, h] -> hex [a,b,c,d,e,f,g,h]
+  ['\\', a, b, c] -> oct [a, b, c]
   [c] -> Just c
   _ -> Nothing
  where hex s = case readHex s of
+                 ((n, _):ns) -> Just $ chr n
+                 _ -> Nothing
+       oct s = case readOct s of
                  ((n, _):ns) -> Just $ chr n
                  _ -> Nothing
 
@@ -196,8 +200,8 @@ unquoteString s = fmap reverse v
                  ('\\':'x':_) -> (unquoteChar $ take 4 s, drop 4 s)
                  ('\\':'u':_) -> (unquoteChar $ take 6 s, drop 6 s)
                  ('\\':'U':_) -> (unquoteChar $ take 10 s, drop 10 s)
-                 ('\\':_)     -> (unquoteChar $ take 2 s, drop 2 s)
-                 (c:ss)        -> (Just c, ss)
+                 ('\\':c2:_)  -> (unquoteChar $ take n s, drop n s) where n = if isOctDigit c2 then 4 else 2
+                 (c:ss)       -> (Just c, ss)
 
 tokenEq :: GoToken -> GoToken -> Bool
 tokenEq (GoTokComment _ _) (GoTokComment _ _) = True
