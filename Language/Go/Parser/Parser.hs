@@ -3,10 +3,25 @@
 -- Copyright   : (c) 2011 Andrew Robbins
 -- License     : GPLv3 (see COPYING)
 --
--- y
+-- This module provides parsers for the various Go language elements.
 
 {- LANGUAGE CPP -}
-module Language.Go.Parser.Parser where
+module Language.Go.Parser.Parser (
+  -- Tokenizer and top-level parser.
+  goTokenize,
+  goParse,
+  goParseTokens,
+  goParseFileWith,
+  goParseTestWith,
+
+  goSource,
+  goImportDecl,
+  goTopLevelDecl,
+  goType,
+  goBlock,
+  goExpression,
+  goStatement,
+) where
 import Language.Go.Parser.Operators
 import Language.Go.Parser.Tokens
 import Language.Go.Parser.Lexer (alexScanTokens)
@@ -939,7 +954,6 @@ goRangeClause = do
 goAnyEqual :: GoParser GoOp
 goAnyEqual =  do goTokEqual;   return $ GoOp "="
           <|> do goTokColonEq; return $ GoOp ":="
--- goEmpty = (GoStmtSimple GoSimpEmpty)
 
 -- | Standard @GoStmt@
 --

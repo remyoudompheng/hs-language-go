@@ -34,7 +34,7 @@ testSwitch4 = testParse "test empty switch 2"
     GoStmtSwitch (GoCond Nothing (Just (GoPrim (GoParen $ ident "v")))) []
 
 testSwitch5 = testParse "test empty switch parsing ambiguity"
-    goExprSwitchStmt "switch v {}" $
+    goStatement "switch v {}" $
     GoStmtSwitch (GoCond Nothing (Just $ ident "v")) []
 
 testSwitch6 = testParse "test switch on call"
@@ -55,8 +55,8 @@ testSelect3 = testParse "test select with parentheses"
     GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
 
 testPostfix1 = testParse "test increment"
-    goIncDecStmt "*p++" $
-    GoSimpInc $ Go1Op (GoOp "*") $ ident "p"
+    goStatement "*p++" $
+    GoStmtSimple $ GoSimpInc $ Go1Op (GoOp "*") $ ident "p"
 
 testLabel1 = testParse "labelled statement"
     goStatement "label: return" $

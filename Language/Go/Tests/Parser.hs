@@ -24,12 +24,8 @@ testImport1 = testParse "dot import"
     GoImportDecl [GoImpSpec GoImpDot "os"]
 
 testBuiltin1 = testParse "test builtin make"
-    goBuiltinCall "make([]int, 4)" $
-    GoMake (GoSliceType (namedType "int")) [GoPrim $ GoLiteral $ GoLitInt "4" 4]
-
-testBuiltin2 = testParse "test builtin make as expr"
     goExpression "make([]int, 4)" $
-    GoPrim (GoMake (GoSliceType $ namedType "int") [GoPrim $ GoLiteral $ GoLitInt "4" 4])
+    GoPrim $ GoMake (GoSliceType (namedType "int")) [GoPrim $ GoLiteral $ GoLitInt "4" 4]
 
 testConversion1 = testParse "byte slice conversion"
     goExpression "[]byte(\"hello world\")" $
@@ -41,8 +37,8 @@ testConversion2 = testParse "conversion to pointer"
   where unsafeptr = GoQual (Just $ GoId "unsafe") (GoId "Pointer")
 
 testLiteral1 = testParse "empty composite literal"
-    goCompositeLit "T{}" $
-    GoLitComp (namedType "T") (GoComp [])
+    goExpression "T{}" $
+    GoPrim $ GoLiteral $ GoLitComp (namedType "T") (GoComp [])
 
 testLiteral2 = testParse "non-empty composite literal as expression"
     goExpression "T{Field: value}" $
@@ -61,8 +57,8 @@ testLiteral3 = testParse "composite literal in statement"
       ))]
 
 testLiteral4 = testParse "map literal with composite keys"
-    goCompositeLit "map[T]U{T{1, 2}: \"hello\"}" $
-    GoLitComp
+    goExpression "map[T]U{T{1, 2}: \"hello\"}" $
+    GoPrim $ GoLiteral $ GoLitComp
       (GoMapType (namedType "T") (namedType "U"))
       (GoComp [
         GoElement
@@ -76,8 +72,8 @@ testLiteral4 = testParse "map literal with composite keys"
   where lit s n = GoValueExpr (GoPrim (GoLiteral (GoLitInt s n)))
 
 testLiteral5 = testParse "array literal with abridged syntax"
-    goCompositeLit "[]T{{a, b}, {c, d},}" $
-    GoLitComp (GoSliceType $ namedType "T")
+    goExpression "[]T{{a, b}, {c, d},}" $
+    GoPrim $ GoLiteral $ GoLitComp (GoSliceType $ namedType "T")
       (GoComp [ GoElement GoKeyNone (GoValueComp (GoComp [elem "a", elem "b"]))
               , GoElement GoKeyNone (GoValueComp (GoComp [elem "c", elem "d"])) ])
   where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
@@ -110,7 +106,7 @@ testMethod1 = testParse "method call"
     GoPrim $ GoCall (GoQual (Just $ GoId "time") (GoId "Now")) [] False
 
 testMethod2 = testParse "method signature with anonymous receiver"
-    goMethodDecl "func (T) Method ()" $
+    goTopLevelDecl "func (T) Method ()" $
     GoMeth $ GoMethDecl
       (GoRec False Nothing $ GoTypeName Nothing (GoId "T"))
       (GoId "Method")
@@ -139,7 +135,6 @@ testIfaceDecl1 = testParse "interface decl with embedded qualified interface"
 testsParser =
   [ testImport1
   , testBuiltin1
-  , testBuiltin2
   , testConversion1
   , testConversion2
   , testLiteral1
