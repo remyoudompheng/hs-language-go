@@ -978,8 +978,8 @@ goCommClause = do
 -- See also: SS. 11.11. Select statements
 goCommCase :: GoParser ([GoStmt] -> GoCase GoChan)
 goCommCase = goCommCase' <|> goCommCase''
-goCommCase' = do goTokCase; ch <- goChanStmt; return $ GoCase [ch]
-goCommCase'' = do goTokDefault; return GoDefault
+  where goCommCase' = do goTokCase; ch <- goChanStmt; return $ GoCase [ch]
+        goCommCase'' = do goTokDefault; return GoDefault
 
 -- | Nonstandard
 goChanStmt :: GoParser GoChan
@@ -993,8 +993,9 @@ goRecvStmt :: GoParser GoChan
 goRecvStmt = do
   as <- optionMaybe $ try (do
                ex <- goExpression
+               ex2 <- optionMaybe (goTokComma >> goExpression)
                op <- goAnyEqual
-               return (ex, op))
+               return (ex, ex2, op))
   re <- goRecvExpr
   return $ GoChanRecv as re
 

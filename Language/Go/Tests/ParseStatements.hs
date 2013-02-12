@@ -54,6 +54,11 @@ testSelect3 = testParse "test select with parentheses"
     goStatement "select { case (<-ch): }" $
     GoStmtSelect [GoCase [GoChanRecv Nothing (Go1Op (GoOp "<-") (ident "ch"))] []]
 
+testSelect4 = testParse "test select with 2-return receive"
+    goStatement "select { case v, ok := <-ch: }" $
+    GoStmtSelect [GoCase [
+      GoChanRecv (Just (ident "v", Just $ ident "ok", GoOp ":=")) (Go1Op (GoOp "<-") (ident "ch"))] []]
+
 testPostfix1 = testParse "test increment"
     goStatement "*p++" $
     GoStmtSimple $ GoSimpInc $ Go1Op (GoOp "*") $ ident "p"
@@ -160,6 +165,7 @@ testsParseStmts =
   , testSelect1
   , testSelect2
   , testSelect3
+  , testSelect4
   , testPostfix1
   , testLabel1
   , testLabel2

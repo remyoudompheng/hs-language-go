@@ -218,7 +218,7 @@ data GoSimp = GoSimpEmpty
             | GoSimpVar [GoId] [GoExpr]      -- ShortVarDecl
               deriving (Eq, Read, Show)
 
-data GoChan = GoChanRecv (Maybe (GoExpr, GoOp)) GoExpr
+data GoChan = GoChanRecv (Maybe (GoExpr, Maybe GoExpr, GoOp)) GoExpr
             | GoChanSend GoExpr GoExpr
               deriving (Eq, Read, Show)
 
