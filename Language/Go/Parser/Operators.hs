@@ -4,9 +4,10 @@ module Language.Go.Parser.Operators (
 ) where
 
 import Text.Parsec.Expr
+import Text.Parsec.Prim (try, token)
 import Text.Parsec.Combinator (anyToken)
 
-import Language.Go.Parser.Tokens
+import Language.Go.Parser.Tokens (GoParser,GoToken(..),GoTokenPos(..))
 import Language.Go.Syntax.AST
 
 -- | @goOpExpr p@ returns a parser for expressions with 
@@ -18,25 +19,11 @@ goOpExpr p = buildExpressionParser goOpTable p
 -- buildExpressionParser so we parse them separately
 -- in goUnaryExpr.
 goOpTable =
-  [ [ Infix goTokStar    AssocLeft
-    , Infix goTokSolidus AssocLeft
-    , Infix goTokPercent AssocLeft
-    , Infix goTokSHL     AssocLeft
-    , Infix goTokSHR     AssocLeft
-    , Infix goTokAND     AssocLeft
-    , Infix goTokBUT     AssocLeft ]
-  , [ Infix goTokPlus    AssocLeft
-    , Infix goTokMinus   AssocLeft
-    , Infix goTokIOR     AssocLeft
-    , Infix goTokXOR     AssocLeft ]
-  , [ Infix goTokEQ      AssocLeft
-    , Infix goTokNE      AssocLeft
-    , Infix goTokLT      AssocLeft
-    , Infix goTokLE      AssocLeft
-    , Infix goTokGT      AssocLeft
-    , Infix goTokGE      AssocLeft ]
-  , [ Infix goTokLAND    AssocLeft ]
-  , [ Infix goTokLOR     AssocLeft ]
+  [ [ Infix (goBinaryOp mul_op) AssocLeft ]
+  , [ Infix (goBinaryOp add_op) AssocLeft ]
+  , [ Infix (goBinaryOp rel_op) AssocLeft ]
+  , [ Infix (goBinaryOp and_op) AssocLeft ]
+  , [ Infix (goBinaryOp or_op) AssocLeft ]
   ]
 
 -- | @goUnaryOp@ parse a unary (prefix) operator.
@@ -55,26 +42,48 @@ goUnaryOp = do
     GoTokArrow   -> return $ GoOp "<-"
     _ -> fail "not a unary operator"
 
--- BEGIN operators
-goTokLOR      = do token GoTokLOR      ; return$Go2Op$GoOp "||" -- '||'
-goTokLAND     = do token GoTokLAND     ; return$Go2Op$GoOp "&&" -- '&&'
-goTokEQ       = do token GoTokEQ       ; return$Go2Op$GoOp "==" -- '=='
-goTokNE       = do token GoTokNE       ; return$Go2Op$GoOp "!=" -- '!='
-goTokLT       = do token GoTokLT       ; return$Go2Op$GoOp "<"  -- '<'
-goTokLE       = do token GoTokLE       ; return$Go2Op$GoOp "<=" -- '<='
-goTokGT       = do token GoTokGT       ; return$Go2Op$GoOp ">"  -- '>'
-goTokGE       = do token GoTokGE       ; return$Go2Op$GoOp ">=" -- '>='
-goTokPlus     = do token GoTokPlus     ; return$Go2Op$GoOp "+"  -- '+'
-goTokMinus    = do token GoTokMinus    ; return$Go2Op$GoOp "-"  -- '-'
-goTokIOR      = do token GoTokIOR      ; return$Go2Op$GoOp "|"  -- '|'
-goTokXOR      = do token GoTokXOR      ; return$Go2Op$GoOp "^"  -- '^'
-goTokStar     = do token GoTokAsterisk ; return$Go2Op$GoOp "*"  -- '*'
-goTokSolidus  = do token GoTokSolidus  ; return$Go2Op$GoOp "/"  -- '/'
-goTokPercent  = do token GoTokPercent  ; return$Go2Op$GoOp "%"  -- '%'
-goTokSHL      = do token GoTokSHL      ; return$Go2Op$GoOp "<<" -- '<<'
-goTokSHR      = do token GoTokSHR      ; return$Go2Op$GoOp ">>" -- '>>'
-goTokAND      = do token GoTokAND      ; return$Go2Op$GoOp "&"  -- '&'
-goTokBUT      = do token GoTokBUT      ; return$Go2Op$GoOp "&^" -- '&^'
--- END operators
+goBinaryOp :: (GoToken -> Maybe String) -> GoParser (GoExpr -> GoExpr -> GoExpr)
+goBinaryOp want = try $ do
+  -- binary_op  = "||" | "&&" | rel_op | add_op | mul_op .
+  -- rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
+  -- add_op     = "+" | "-" | "|" | "^" .
+  -- mul_op     = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" .
+  let s (GoTokenPos _ t) = show t
+      pos (GoTokenPos pos _) = pos
+      match (GoTokenPos _ t) = want t
+  op <- token s pos match
+  return (Go2Op $ GoOp op)
+
+mul_op :: GoToken -> Maybe String
+mul_op op = case op of
+  GoTokAsterisk -> Just "*"
+  GoTokSolidus  -> Just "/"
+  GoTokPercent  -> Just "%"
+  GoTokSHL      -> Just "<<"
+  GoTokSHR      -> Just ">>"
+  GoTokAND      -> Just "&"
+  GoTokBUT      -> Just "&^"
+  _ -> Nothing
+ 
+add_op :: GoToken -> Maybe String
+add_op op = case op of
+  GoTokPlus  -> Just "+"
+  GoTokMinus -> Just "-"
+  GoTokIOR   -> Just "|"
+  GoTokXOR   -> Just "^"
+  _ -> Nothing
+
+rel_op :: GoToken -> Maybe String
+rel_op op = case op of
+  GoTokEQ -> Just "=="
+  GoTokNE -> Just "!="
+  GoTokLT -> Just "<" 
+  GoTokLE -> Just "<="
+  GoTokGT -> Just ">" 
+  GoTokGE -> Just ">="
+  _ -> Nothing
+
+or_op  op = if op == GoTokLOR  then Just "||" else Nothing 
+and_op op = if op == GoTokLAND then Just "&&" else Nothing 
 
 
