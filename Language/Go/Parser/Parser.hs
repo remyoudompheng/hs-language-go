@@ -771,12 +771,6 @@ goSimple =  (try goSendStmt)       -- 'SimpleStmt/SendStmt'
         <|> (try goAssignment)     -- 'SimpleStmt/Assignment'
         <|> (liftM GoSimpExpr goExpression) -- 'SimpleStmt/ExpressionStmt'
 
--- | Standard @EmptyStmt@
---
--- See also: SS. 11.1. Empty statements
-goEmptyStmt :: GoParser GoStmt
-goEmptyStmt = return $ GoStmtSimple GoSimpEmpty
-
 -- | Standard @LabeledStmt@
 --
 -- See also: SS. 11.2. Labeled statements
@@ -784,7 +778,7 @@ goLabeledStmt :: GoParser GoStmt
 goLabeledStmt = do
   id <- goIdentifier -- Go @Label@
   goTokColon
-  st <- goStatement
+  st <- option (GoStmtSimple GoSimpEmpty) goStatement
   return $ GoStmtLabeled id st
 
 -- | Standard @SendStmt@
@@ -1076,17 +1070,7 @@ goSource = do
   imp <- many $ goSemi goImportDecl
   top <- many $ goSemi goTopLevelDecl
   eof
---goSourceRest
---notFolloedBy anyToken
   return $ GoSource pkg imp top
-
--- | Nonstandard
-goSourceRest :: GoParser ()
-goSourceRest = do
-  rest <- many anyToken
-  case length rest of
-    0 -> return ()
-    _ -> fail "language-go: Source not consumed"
 
 -- | Standard @PackageClase@
 --

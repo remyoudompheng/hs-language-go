@@ -62,6 +62,13 @@ testLabel1 = testParse "labelled statement"
     goStatement "label: return" $
     GoStmtLabeled (GoId "label") (GoStmtReturn [])
 
+testLabel2 = testParse "labels"
+    goStatement "{ exit: ; goto exit }" $
+    GoStmtBlock (GoBlock [
+       GoStmtLabeled (GoId "exit") (GoStmtSimple GoSimpEmpty)
+     , GoStmtGoto (GoId "exit")
+    ])
+
 testFor1 = testParse "while true"
     goStatement "for {}" $
     GoStmtFor (GoForWhile Nothing) (GoBlock [])
@@ -155,6 +162,7 @@ testsParseStmts =
   , testSelect3
   , testPostfix1
   , testLabel1
+  , testLabel2
   , testFor1
   , testFor2
   , testFor3

@@ -48,11 +48,7 @@ Extra-source-files:
   tests.sh
 
 Library
-  ghc-options:
-    -fwarn-incomplete-patterns
-    -fwarn-dodgy-exports
-    -fwarn-dodgy-imports
-    -fwarn-unused-imports
+  ghc-options: -W
 
   Build-Depends:
     base == 4.*,
