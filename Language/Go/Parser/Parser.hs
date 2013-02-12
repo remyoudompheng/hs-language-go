@@ -1086,11 +1086,14 @@ goPackageClause = do
 goImportDecl :: GoParser GoPrel
 goImportDecl = goTokImport >> liftM GoImportDecl goImportSpec
 
--- | Nonstandard
-goParenish x = goParenish'' x <|> goParenish' x where
-    goParenish' = liftM (replicate 1)
-    goParenish'' = goParen . many . goSemi
-
+-- | List of specs separated by semicolons, in parentheses.
+-- See also goBlockish.
+goParenish :: GoParser a -> GoParser [a]
+goParenish x = goParen xs <|> one
+  where one = do { t <- x; return [t] }
+        xs = do
+          lines <- sepEndBy (optionMaybe x) goTokSemicolon
+          return $ catMaybes lines
 
 -- | Standard @ImportSpec@
 --

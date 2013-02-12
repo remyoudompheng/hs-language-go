@@ -23,6 +23,14 @@ testImport1 = testParse "dot import"
     goImportDecl "import . \"os\"" $
     GoImportDecl [GoImpSpec GoImpDot "os"]
 
+testConst1 = testParse "const decl on one line"
+    goStatement "const ( A = 1 )" $
+    GoStmtDecl $ GoConst [GoCVSpec [GoId "A"] Nothing [GoPrim $ GoLiteral $ GoLitInt "1" 1]]
+
+testConst2 = testParse "const decl on one line"
+    goStatement "const A = 1 " $
+    GoStmtDecl $ GoConst [GoCVSpec [GoId "A"] Nothing [GoPrim $ GoLiteral $ GoLitInt "1" 1]]
+
 testBuiltin1 = testParse "test builtin make"
     goExpression "make([]int, 4)" $
     GoPrim $ GoMake (GoSliceType (namedType "int")) [GoPrim $ GoLiteral $ GoLitInt "4" 4]
@@ -134,6 +142,8 @@ testIfaceDecl1 = testParse "interface decl with embedded qualified interface"
 
 testsParser =
   [ testImport1
+  , testConst1
+  , testConst2
   , testBuiltin1
   , testConversion1
   , testConversion2
