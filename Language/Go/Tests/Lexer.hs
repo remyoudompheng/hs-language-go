@@ -10,12 +10,11 @@ module Language.Go.Tests.Lexer (testsLexer) where
 import Test.HUnit
 
 import Language.Go.Parser.Lexer
-import Language.Go.Parser.Parser (goTokenize)
 import Language.Go.Parser.Tokens
 
 testLex :: String -> String -> [GoToken] -> Test
 testLex desc text ref = TestLabel desc $ TestCase $ assertEqual desc ref toks
-  where toks = map strip $ goTokenize text
+  where toks = map strip $ insertSemi $ alexScanTokens text
         strip (GoTokenPos _ tok) = tok
 
 testRawString1 = testLex "raw string"
@@ -84,6 +83,14 @@ testId1 = testLex "non-ASCII identifier"
   , GoTokSemicolon
   ]
 
+testComment1 = testLex "comment with non-ASCII characters"
+  "/* αβ */"
+  [ GoTokComment True " αβ " ]
+
+testComment2 = testLex "comment with non-ASCII characters"
+  "/*\n\tαβ\n*/"
+  [ GoTokComment True "\n\tαβ\n" ]
+
 testsLexer =
   [ testRawString1
   , testRawString2
@@ -96,4 +103,6 @@ testsLexer =
   , testString3
   , testString4
   , testId1
+  , testComment1
+  , testComment2
   ]

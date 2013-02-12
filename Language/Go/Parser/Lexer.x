@@ -24,7 +24,7 @@ $sign           = [\+\-]
 
 -- SS. 4.1. Comments
 @ol_char    = [^\n]
-@ml_char    = [\x00-\x29\x2B-\xFF]|\*[\x00-\x2E\x30-\xFF]
+@ml_char    = ([$printable $white] # \*)|\*([$printable $white] # \/)
 @ol_comment = "//"(@ol_char)*\n
 @ml_comment = "/*"(@ml_char)*"*/"
 
