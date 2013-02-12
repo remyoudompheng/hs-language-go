@@ -1,3 +1,11 @@
+-- |
+-- Module      : Language.Go.Tests.Parser
+-- Copyright   : (c) 2013 Rémy Oudompheng
+-- License     : GPLv3 (see COPYING)
+-- 
+-- This module provides tests for parsing of expressions and top-level
+-- constructs.
+
 module Language.Go.Tests.Parser (testsParser) where
 
 import Language.Go.Parser.Parser

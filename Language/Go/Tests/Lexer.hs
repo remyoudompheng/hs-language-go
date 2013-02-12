@@ -1,3 +1,10 @@
+-- |
+-- Module      : Language.Go.Tests.Lexer
+-- Copyright   : (c) 2013 Rémy Oudompheng
+-- License     : GPLv3 (see COPYING)
+-- 
+-- This module provides tests for the lexer.
+
 module Language.Go.Tests.Lexer (testsLexer) where
 
 import Test.HUnit

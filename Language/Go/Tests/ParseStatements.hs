@@ -1,3 +1,10 @@
+-- |
+-- Module      : Language.Go.Tests.ParseStatements
+-- Copyright   : (c) 2013 Rémy Oudompheng
+-- License     : GPLv3 (see COPYING)
+-- 
+-- This module provides tests for parsing of statements.
+
 module Language.Go.Tests.ParseStatements (testsParseStmts) where
 
 import Language.Go.Parser.Parser
