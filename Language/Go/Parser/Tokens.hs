@@ -4,7 +4,76 @@
 -- License     : GPLv3 (see COPYING)
 --
 -- x
-module Language.Go.Parser.Tokens where
+module Language.Go.Parser.Tokens (
+  GoParser,
+  GoParserState(..),
+  GoToken(..),
+  GoTokenPos(..),
+  runGoParser,
+  insertSemi,
+  stripComments,
+
+  token,
+  tokenFromComment,
+  tokenFromInt,
+  tokenFromReal,
+  tokenFromImag,
+  tokenFromChar,
+  tokenFromRawStr,
+  tokenFromString,
+
+  unquoteChar,
+  unquoteString,
+
+  goTokLParen,
+  goTokRParen,
+  goTokLBrace,
+  goTokRBrace,
+  goTokLBracket,
+  goTokRBracket,
+
+  goTokSemicolon,
+  goTokColon,
+  goTokColonEq,
+  goTokEqual,
+  goTokComma,
+  goTokFullStop,
+  goTokEllipsis,
+
+  goTokBreak,
+  goTokCase,
+  goTokChan,
+  goTokConst,
+  goTokContinue,
+  goTokDefault,
+  goTokDefer,
+  goTokElse,
+  goTokFallthrough,
+  goTokFor,
+  goTokFunc,
+  goTokGo,
+  goTokGoto,
+  goTokIf,
+  goTokImport,
+  goTokInterface,
+  goTokMap,
+  goTokPackage,
+  goTokRange,
+  goTokReturn,
+  goTokSelect,
+  goTokStruct,
+  goTokSwitch,
+  goTokType,
+  goTokVar,
+
+  goTokAsterisk,
+  goTokArrow,
+
+  goIdentifier,
+  goAssignOp,
+  enterParen,
+  exitParen,
+) where
 
 import Numeric (readHex, readOct)
 import Data.Maybe (mapMaybe)
@@ -183,10 +252,10 @@ unquoteChar s = case s of
   [c] -> Just c
   _ -> Nothing
  where hex s = case readHex s of
-                 ((n, _):ns) -> Just $ chr n
+                 ((n, _):_) -> Just $ chr n
                  _ -> Nothing
        oct s = case readOct s of
-                 ((n, _):ns) -> Just $ chr n
+                 ((n, _):_) -> Just $ chr n
                  _ -> Nothing
 
 unquoteString :: String -> Maybe String
@@ -214,9 +283,9 @@ tokenEq a b = a == b
 
 token :: GoToken -> GoParser GoToken
 token tok = Prim.token showTok posnTok testTok
-    where showTok (GoTokenPos pos t) = show t
-          posnTok (GoTokenPos pos t) = pos
-          testTok (GoTokenPos pos t) = if tokenEq tok t
+    where showTok (GoTokenPos _ t)   = show t
+          posnTok (GoTokenPos pos _) = pos
+          testTok (GoTokenPos _ t)   = if tokenEq tok t
                                        then Just t
                                        else Nothing
 
