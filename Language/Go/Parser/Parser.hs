@@ -224,6 +224,7 @@ goInterfaceType = do
 -- | Standard @MethodSpec@
 --
 -- See also: SS. 6.9. Interface types
+goMethodSpec :: GoParser GoMethSpec
 goMethodSpec = try goMethodSpec' <|> goMethodSpec'' where
 
     goMethodSpec'' = do
@@ -844,6 +845,7 @@ goIfStmt = do
 -- | Standard @IfStmt@
 --
 -- See also: SS. 11.8. Switch statements
+goSwitchStmt :: GoParser GoStmt
 goSwitchStmt = try goExprSwitchStmt
            <|> goTypeSwitchStmt
 
@@ -871,8 +873,8 @@ goExprCaseClause = do
 -- See also: SS. 11.8. Switch statements
 goExprSwitchCase :: GoParser ([GoStmt] -> GoCase GoExpr)
 goExprSwitchCase = goExprSwitchCase' <|> goExprSwitchCase''
-goExprSwitchCase' = do goTokCase; el <- goExpressionList; return $ GoCase el
-goExprSwitchCase'' = do goTokDefault; return GoDefault
+  where goExprSwitchCase' = do goTokCase; el <- goExpressionList; return $ GoCase el
+        goExprSwitchCase'' = do goTokDefault; return GoDefault
 
 -- | Standard @TypeSwitchStmt@
 goTypeSwitchStmt :: GoParser GoStmt
@@ -902,8 +904,8 @@ goTypeCaseClause = do
 -- | Standard @TypeSwitchCase@
 goTypeSwitchCase :: GoParser ([GoStmt] -> GoCase GoType)
 goTypeSwitchCase = goTypeSwitchCase' <|> goTypeSwitchCase''
-goTypeSwitchCase' = do goTokCase; tl <- goTypeList; return $ GoCase tl
-goTypeSwitchCase'' = do goTokDefault; return GoDefault
+  where goTypeSwitchCase' = do goTokCase; tl <- goTypeList; return $ GoCase tl
+        goTypeSwitchCase'' = do goTokDefault; return GoDefault
 
 -- | Standard @TypeList@
 goTypeList :: GoParser [GoType]
@@ -912,6 +914,7 @@ goTypeList = sepBy1 goType goTokComma
 -- | Standard @ForStmt@
 --
 -- See also: SS. 11.9. For statements
+goForStmt :: GoParser GoStmt
 goForStmt = do
   goTokFor
   h <- goNoComposite (try goForClause <|> try goRangeClause <|> goCondition)
@@ -1014,31 +1017,37 @@ goRecvExpr =  try goRecvExpr'
 -- | Standard @ReturnStmt@
 --
 -- See also: SS. 11.12. Return statements
+goReturnStmt :: GoParser GoStmt
 goReturnStmt = do goTokReturn; liftM GoStmtReturn $ option [] goExpressionList
 
 -- | Standard @BreakStmt@
 --
 -- See also: SS. 11.13. Break statements
+goBreakStmt :: GoParser GoStmt
 goBreakStmt = do goTokBreak; liftM GoStmtBreak $ optionMaybe goIdentifier
 
 -- | Standard @ContinueStmt@
 --
 -- See also: SS. 11.14. Continue statementss
+goContinueStmt :: GoParser GoStmt
 goContinueStmt = do goTokContinue; liftM GoStmtContinue $ optionMaybe goIdentifier
 
 -- | Standard @GotoStmt@
 --
 -- See also: SS. 11.15. Goto statements
+goGotoStmt :: GoParser GoStmt
 goGotoStmt = do goTokGoto; liftM GoStmtGoto $ goIdentifier
 
 -- | Standard @FallthroughStmt@
 --
 -- See also: SS. 11.16. Fallthrough statements
+goFallthroughStmt :: GoParser GoStmt
 goFallthroughStmt = goTokFallthrough >> return GoStmtFallthrough
 
 -- | Standard @DeferStmt@
 --
 -- See also: SS. 11.17. Defer statements
+goDeferStmt :: GoParser GoStmt
 goDeferStmt = goTokDefer >> liftM GoStmtDefer goExpression
 
 -- | Standard @BuiltinCall@
@@ -1137,6 +1146,7 @@ goString = do
     (GoTokStr rep uni) -> return uni
     _ -> fail "String: what?"
 
+goParen :: GoParser a -> GoParser a
 goParen p = do
   goTokLParen
   enterParen
@@ -1145,7 +1155,10 @@ goParen p = do
   goTokRParen
   return x
 
+goBrace :: GoParser a -> GoParser a
 goBrace = between goTokLBrace goTokRBrace
+
+goBracket :: GoParser a -> GoParser a
 goBracket = between goTokLBracket goTokRBracket
 
 -- parsers

@@ -5,8 +5,6 @@
 -- 
 -- This module defines the nodes of Go syntax tree.
 
-{-# LANGUAGE CPP #-}
-#define GO_AST_DERIVING deriving (Eq, Read, Show)
 module Language.Go.Syntax.AST where
 
 -- | Go Language source start
@@ -14,14 +12,9 @@ data GoSource = GoSource {
       getPackage      :: GoId,
       getTopLevelPrel :: [GoPrel],
       getTopLevelDecl :: [GoDecl]}
-                GO_AST_DERIVING
+                deriving (Eq, Read, Show)
 
 data GoPrel = GoImportDecl [GoImpSpec]
-#ifdef DSGO
-            | GoPragma String
-            | GoDefine
-            | GoIfPrel
-#endif
                 deriving (Eq, Read, Show)
 
 data GoDecl = GoConst [GoCVSpec]
@@ -71,6 +64,7 @@ data GoRec = GoRec Bool (Maybe GoId) GoType
                 deriving (Eq, Read, Show)
 
 -- GoSig (= 'Signature')
+-- FIXME: variadics?
 data GoSig = GoSig [GoParam] [GoParam]
                 deriving (Eq, Read, Show)
 
@@ -187,7 +181,7 @@ data GoBlock = GoBlock { getStmt::[GoStmt] }
 
 data GoForClause = GoForWhile (Maybe GoExpr)
                  | GoForThree GoSimp (Maybe GoExpr) GoSimp
-                 | GoForRange [GoExpr] GoExpr
+                 | GoForRange [GoExpr] GoExpr -- FIXME: differentiate := and =
                 deriving (Eq, Read, Show)
 
 data GoStmt = GoStmtDecl GoDecl -- 'Statement/Declaration'
@@ -209,7 +203,6 @@ data GoStmt = GoStmtDecl GoDecl -- 'Statement/Declaration'
               deriving (Eq, Read, Show)
 
 data GoSimp = GoSimpEmpty
-            | GoSimpRecv GoExpr        -- SelectStmt/RecvStmt
             | GoSimpSend GoExpr GoExpr -- SimpleStmt/SendStmt
             | GoSimpExpr GoExpr        -- SimpleStmt/ExpressionStmt
             | GoSimpInc  GoExpr        -- SimpleStmt/IncDecStmt[1]
