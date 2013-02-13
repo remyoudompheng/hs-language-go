@@ -3,12 +3,15 @@ RUNHS = runhaskell
 
 TESTAPPS = \
 tests/test-lexer \
-tests/test-parser
+tests/test-parser \
+tests/test-printer
 
 TESTDEPS = \
 Language/Go/Parser/Lexer.hs \
 Language/Go/Parser/Tokens.hs \
+Language/Go/Parser/Operators.hs \
 Language/Go/Parser/Parser.hs \
+Language/Go/Pretty.hs \
 Language/Go/Syntax/AST.hs
 
 .PHONY: all
@@ -21,6 +24,7 @@ dist:
 .PHONY: clean
 clean:
 	$(RUNHS) Setup clean
+	rm -f tests/{*.hi,*.o}
 
 install: all
 	sudo $(RUNHS) Setup install

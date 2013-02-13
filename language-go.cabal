@@ -62,6 +62,7 @@ Library
     Language.Go.Parser.Parser,
     Language.Go.Parser.Tokens,
     Language.Go.Parser.Operators,
+    Language.Go.Pretty,
     Language.Go.Syntax,
     Language.Go.Syntax.AST
 
