@@ -228,7 +228,9 @@ instance Pretty GoPrim where
           t = if isptr then parens (char '*' <> pretty typ) else pretty typ
   pretty (GoSelect left right) = pretty left <> char '.' <> pretty right
   pretty (GoParen expr)    = parens $ pretty expr
-  pretty (GoCast typ expr) = pretty typ <> parens (pretty expr) -- FIXME paren
+  pretty (GoCast typ expr) = conv typ <> parens (pretty expr)
+    where conv typ@(GoPointerType _) = parens $ pretty typ
+          conv typ@(_) = pretty typ
   pretty (GoNew typ)       = text "new" <> parens (pretty typ)
   pretty (GoMake typ exprs) = case exprs of
     [] -> text "make" <> parens (pretty typ)
