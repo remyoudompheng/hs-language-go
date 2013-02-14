@@ -90,7 +90,7 @@ instance Pretty GoImpSpec where
 instance Pretty GoCVSpec where
   pretty (GoCVSpec lhs typ rhs) = commajoin lhs
                               <+> prettyMaybe typ
-                              <+> equals
+                              <+> (if not (null rhs) then equals else empty)
                               <+> commajoin rhs
 
 instance Pretty GoTypeSpec where
