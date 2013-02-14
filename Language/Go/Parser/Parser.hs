@@ -133,13 +133,13 @@ goFieldDecl = (try field) <|> anonymous where
     field = do -- Go @FieldDecl@
       ids <- goIdentifierList
       t <- goType
-      tag <- option "" (try goString) -- Go @Tag@
+      tag <- optionMaybe (try goString) -- Go @Tag@
       return $ GoFieldType tag ids t
 
     anonymous = do -- Go @AnonymousField@
       a <- optionMaybe goTokAsterisk -- "*"
       t <- goTypeName -- TypeName
-      tag <- option "" (try goString) -- Go @Tag@
+      tag <- optionMaybe (try goString) -- Go @Tag@
       return $ GoFieldAnon tag (isJust a) t
 
 -- | Standard @PointerType@
@@ -645,16 +645,11 @@ goIndex ex = do
 goSlice :: GoPrim -> GoParser GoPrim
 goSlice ex = do
   goTokLBracket
-  ix <- optionMaybe goExpression
+  x <- optionMaybe goExpression
   goTokColon
-  iy <- optionMaybe goExpression
+  y <- optionMaybe goExpression
   goTokRBracket
-  let zero = GoPrim (GoLiteral (GoLitInt "0" 0))
-  return $ case (ix, iy) of
-             (Just x, Just y)   -> GoSlice ex [x, y]
-             (Just x, Nothing)  -> GoSlice ex [x]
-             (Nothing, Just y)  -> GoSlice ex [zero, y]
-             (Nothing, Nothing) -> GoSlice ex [zero]
+  return $ GoSlice ex x y
 
 -- | Standard @TypeAssertion@
 --

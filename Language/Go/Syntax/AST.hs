@@ -97,11 +97,11 @@ data GoChanKind = GoIChan  -- <-chan
 
 -- GoFieldType
 data GoFieldType = GoFieldType { 
-      getFieldTag  :: String, 
+      getFieldTag  :: Maybe String, 
       getFieldId   :: [GoId], 
       getFieldType :: GoType }
                  | GoFieldAnon { 
-      getFieldTag  :: String, 
+      getFieldTag  :: Maybe String, 
       getFieldPtr  :: Bool,
       getFieldType :: GoType } -- MUST be typename
                 deriving (Eq, Read, Show)
@@ -143,7 +143,7 @@ data GoPrim = GoLiteral GoLit         -- 'PrimaryExpr/Operand/Literal'
 --            | GoBI GoId GoType [GoExpr]  -- 'PrimaryExpr/BuiltinCall'
             | GoSelect GoPrim GoId    -- 'PrimaryExpr/Selector'
             | GoIndex GoPrim GoExpr   -- 'PrimaryExpr/Index'
-            | GoSlice GoPrim [GoExpr] -- 'PrimaryExpr/Slice' FIXME
+            | GoSlice GoPrim (Maybe GoExpr) (Maybe GoExpr) -- 'PrimaryExpr/Slice'
             | GoTA    GoPrim GoType   -- 'PrimaryExpr/TypeAssertion'
             | GoCall  GoPrim [GoExpr] Bool -- 'PrimaryExpr/Call'
               deriving (Eq, Read, Show)

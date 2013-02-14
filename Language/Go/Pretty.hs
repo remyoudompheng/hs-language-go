@@ -123,9 +123,9 @@ instance Pretty GoMethSpec where
 
 -- fields in structs
 instance Pretty GoFieldType where
-  pretty (GoFieldType tag names typ) = ids <+> pretty typ <+> quote tag
+  pretty (GoFieldType tag names typ) = ids <+> pretty typ <+> maybe empty quote tag
     where ids = commajoin names
-  pretty (GoFieldAnon tag ptr typ) = p <> pretty typ <+> quote tag
+  pretty (GoFieldAnon tag ptr typ) = p <> pretty typ <+> maybe empty quote tag
     where p = if ptr then char '*' else empty
 
 instance Pretty GoRec where
@@ -211,8 +211,7 @@ instance Pretty GoPrim where
     where a = commajoin args <> (if variadic then text "..." else empty)
   pretty (GoTA expr typ) = pretty expr <> char '.' <> parens (pretty typ)
   -- FIXME
-  pretty (GoSlice expr lohi) = pretty expr <> lbrack <> indices <> rbrack
-    where indices = hcat $ intersperse colon $ map pretty lohi
+  pretty (GoSlice expr lo hi) = pretty expr <> lbrack <> prettyMaybe lo <> colon <> prettyMaybe hi <> rbrack
 
 instance Pretty GoLit where
   pretty (GoLitInt s _)  = text s
