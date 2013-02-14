@@ -132,8 +132,8 @@ testTypeAssert1 = testParse "type assertion"
 testStructDecl1 = testParse "struct decl with embedded field"
     goType "struct { Field T; U }" $
     GoStructType
-      [ GoFieldType {getFieldTag = "", getFieldId = [GoId "Field"], getFieldType = namedType "T"}
-      , GoFieldAnon {getFieldTag = "", getFieldPtr = False, getFieldType = namedType "U"} 
+      [ GoFieldType {getFieldTag = Nothing, getFieldId = [GoId "Field"], getFieldType = namedType "T"}
+      , GoFieldAnon {getFieldTag = Nothing, getFieldPtr = False, getFieldType = namedType "U"}
       ]
 
 testIfaceDecl1 = testParse "interface decl with embedded qualified interface"

@@ -223,7 +223,9 @@ instance Pretty GoExpr where
 instance Pretty GoPrim where
   pretty (GoLiteral lit)   = pretty lit
   pretty (GoQual pkg name) = qual pkg name
-  pretty (GoMethod typ name) = pretty typ <> char '.' <> pretty name
+  pretty (GoMethod rec name) = t <> char '.' <> pretty name
+    where GoRec isptr _ typ = rec
+          t = if isptr then parens (char '*' <> pretty typ) else pretty typ
   pretty (GoSelect left right) = pretty left <> char '.' <> pretty right
   pretty (GoParen expr)    = parens $ pretty expr
   pretty (GoCast typ expr) = pretty typ <> parens (pretty expr) -- FIXME paren

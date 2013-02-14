@@ -84,7 +84,6 @@ executable tests
         base == 4.*,
         array >= 0,
         parsec >= 3,
+        pretty >= 1.1,
         HUnit
 
-    Other-Modules:
-        Language.Go.Parser.Lexer

@@ -715,7 +715,7 @@ goReceiverType :: GoParser GoRec
 goReceiverType =  try goReceiverType' <|> goReceiverType'' where
 
     goReceiverType'' = do
-      ty <- goParen goPointerType
+      ty <- goParen (goTokAsterisk >> goTypeName)
       return $ GoRec True Nothing ty
 
     goReceiverType' = do
