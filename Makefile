@@ -34,7 +34,7 @@ check: $(TESTAPPS)
 	bash ./tests.sh
 
 tests/test-%: tests/test-%.hs $(TESTDEPS)
-	$(HC) --make $<
+	$(HC) --make -W $<
 
 Language/Go/Parser/Lexer.hs: Language/Go/Parser/Lexer.x
 	alex Language/Go/Parser/Lexer.x

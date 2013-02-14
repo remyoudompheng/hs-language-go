@@ -11,7 +11,7 @@ module Language.Go.Pretty (
 ) where
 
 import Data.List
-import Data.Maybe (maybe, isJust)
+import Data.Maybe (isJust)
 import Text.PrettyPrint
 
 import Language.Go.Syntax.AST
@@ -166,15 +166,21 @@ instance Pretty GoStmt where
 
   pretty (GoStmtIf cond blk stmt) = prettyBlock (text "if" <+> pretty cond) blk
     <+> maybe empty (\s -> text "else" <+> pretty s) stmt
-  pretty (GoStmtFor clause blk) = prettyBlock (text "for") blk -- FIXME
-  pretty (GoStmtSwitch cond cases) = empty -- FIXME
-  pretty (GoStmtTypeSwitch cond cases var) = empty -- FIXME
-  pretty (GoStmtSelect cases) = empty -- FIXME
+  pretty (GoStmtFor clause blk) = prettyBlock (text "for" <+> pretty clause) blk
+  pretty (GoStmtSwitch cond cases) = prettySwitch (text "switch" <+> pretty cond) cases
+  pretty (GoStmtTypeSwitch cond cases var) = prettySwitch prefix cases
+    where lhs = maybe empty (\v -> pretty v <+> text ":=") var
+          rhs = pretty cond <> text ".(type)"
+          prefix = text "switch" <+> lhs <+> rhs
+  pretty (GoStmtSelect cases) = prettySwitch (text "select") cases
 
   pretty (GoStmtBlock blk) = prettyBlock empty blk
 
+prettySwitch :: Pretty a => Doc -> [a] -> Doc
+prettySwitch prefix cases = (prefix <+> lbrace) $+$ vcat (map pretty cases) $+$ rbrace
+
 instance Pretty GoSimp where
-  pretty GoSimpEmpty = text "" 
+  pretty GoSimpEmpty = text ""
   pretty (GoSimpSend left right) = pretty left <+> text "<-" <+> pretty right
   pretty (GoSimpExpr expr) = pretty expr
   pretty (GoSimpInc expr) = pretty expr <> text "++"
@@ -185,6 +191,25 @@ instance Pretty GoSimp where
 instance Pretty GoCond where
   pretty (GoCond stmt expr) = prettyMaybe stmt <> maybesemi <+> prettyMaybe expr
     where maybesemi = if isJust stmt then semi else empty
+
+instance Pretty GoForClause where
+  pretty (GoForWhile expr) = prettyMaybe expr
+  pretty (GoForThree init cond incr) = pretty init <> semi <+> prettyMaybe cond <> semi <+> pretty incr
+  pretty (GoForRange lhs rhs) = commajoin lhs <+> text ":=" <+> text "range" <+> pretty rhs -- FIXME
+
+instance Pretty a => Pretty (GoCase a) where
+  pretty (GoCase items stmts) = p1 $+$ indent p2
+    where p1 = text "case" <+> commajoin items <> colon
+          p2 = vcat $ map pretty stmts
+  pretty (GoDefault stmts) = (text "default" <> colon) $+$ indent p2
+    where p2 = vcat $ map pretty stmts
+
+instance Pretty GoChan where
+  -- CommClause
+  pretty (GoChanRecv Nothing expr) = pretty expr
+  pretty (GoChanRecv (Just (v, ok, GoOp eq)) expr) = lhs <+> text eq <+> pretty expr
+    where lhs = pretty v <> maybe empty (\x -> comma <+> pretty x) ok
+  pretty (GoChanSend left right) = pretty left <+> text "<-" <+> pretty right
 
 --
 -- | Expressions
@@ -210,7 +235,6 @@ instance Pretty GoPrim where
   pretty (GoCall func args variadic) = pretty func <> parens a
     where a = commajoin args <> (if variadic then text "..." else empty)
   pretty (GoTA expr typ) = pretty expr <> char '.' <> parens (pretty typ)
-  -- FIXME
   pretty (GoSlice expr lo hi) = pretty expr <> lbrack <> prettyMaybe lo <> colon <> prettyMaybe hi <> rbrack
 
 instance Pretty GoLit where
