@@ -143,7 +143,7 @@ data GoPrim = GoLiteral GoLit         -- 'PrimaryExpr/Operand/Literal'
 --            | GoBI GoId GoType [GoExpr]  -- 'PrimaryExpr/BuiltinCall'
             | GoSelect GoPrim GoId    -- 'PrimaryExpr/Selector'
             | GoIndex GoPrim GoExpr   -- 'PrimaryExpr/Index'
-            | GoSlice GoPrim [GoExpr] -- 'PrimaryExpr/Slice'
+            | GoSlice GoPrim [GoExpr] -- 'PrimaryExpr/Slice' FIXME
             | GoTA    GoPrim GoType   -- 'PrimaryExpr/TypeAssertion'
             | GoCall  GoPrim [GoExpr] Bool -- 'PrimaryExpr/Call'
               deriving (Eq, Read, Show)

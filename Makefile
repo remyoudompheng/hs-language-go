@@ -24,7 +24,8 @@ dist:
 .PHONY: clean
 clean:
 	$(RUNHS) Setup clean
-	rm -f tests/{*.hi,*.o}
+	find . -name '*.hi' -delete
+	find . -name '*.o' -delete
 
 install: all
 	sudo $(RUNHS) Setup install

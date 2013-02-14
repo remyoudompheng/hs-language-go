@@ -4,14 +4,14 @@
 -- License     : GPLv3 (see COPYING)
 --
 -- This module provides a pretty printer for Go code similar
--- to the gofmt tool, though not equivalent.
+-- to gofmt -tabs=false -tabwidth=4 -comments=false.
 
 module Language.Go.Pretty (
   Pretty(..),
 ) where
 
 import Data.List
-import Data.Maybe (maybe)
+import Data.Maybe (maybe, isJust)
 import Text.PrettyPrint
 
 import Language.Go.Syntax.AST
@@ -24,7 +24,7 @@ class Pretty p where
 vsep :: [Doc] -> Doc
 vsep blocks = foldl ($+$) empty $ intersperse (text "") blocks
 
-indent  = nest 8
+indent  = nest 4
 quote s = char '"' <> text s <> char '"'
 
 commajoin :: Pretty a => [a] -> Doc
@@ -94,7 +94,7 @@ instance Pretty GoCVSpec where
                               <+> commajoin rhs
 
 instance Pretty GoTypeSpec where
-  pretty _ = empty -- FIXME
+  pretty (GoTypeSpec name typ) = pretty name <+> pretty typ
 
 --
 -- | Types
@@ -129,12 +129,16 @@ instance Pretty GoFieldType where
     where p = if ptr then char '*' else empty
 
 instance Pretty GoRec where
-  pretty (GoRec ptr name typ) = prettyMaybe name <+> p <> pretty typ
+  pretty (GoRec ptr name typ) = prettyMaybe name <+> (p <> pretty typ)
     where p = if ptr then char '*' else empty
 
 -- function signatures
 instance Pretty GoSig where
+  -- (a, b, c T, d U)
   pretty (GoSig ins []) = parens $ commajoin ins
+  -- (a, b, c T, d U) V
+  pretty (GoSig ins [GoParam [] typ]) = parens (commajoin ins) <+> pretty typ
+  -- (a, b, c T, d U) (v V, w W)
   pretty (GoSig ins outs) = pins <+> pouts
     where pins = parens $ commajoin ins
           pouts = parens $ commajoin outs
@@ -179,7 +183,8 @@ instance Pretty GoSimp where
   pretty (GoSimpVar lhs rhs) = commajoin lhs <+> text ":=" <+> commajoin rhs
 
 instance Pretty GoCond where
-  pretty _ = empty -- FIXME
+  pretty (GoCond stmt expr) = prettyMaybe stmt <> maybesemi <+> prettyMaybe expr
+    where maybesemi = if isJust stmt then semi else empty
 
 --
 -- | Expressions
@@ -204,8 +209,10 @@ instance Pretty GoPrim where
   pretty (GoIndex expr idx) = pretty expr <> brackets (pretty idx)
   pretty (GoCall func args variadic) = pretty func <> parens a
     where a = commajoin args <> (if variadic then text "..." else empty)
+  pretty (GoTA expr typ) = pretty expr <> char '.' <> parens (pretty typ)
   -- FIXME
-  pretty _ = empty
+  pretty (GoSlice expr lohi) = pretty expr <> lbrack <> indices <> rbrack
+    where indices = hcat $ intersperse colon $ map pretty lohi
 
 instance Pretty GoLit where
   pretty (GoLitInt s _)  = text s
