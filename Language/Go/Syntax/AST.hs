@@ -97,11 +97,11 @@ data GoChanKind = GoIChan  -- <-chan
 
 -- GoFieldType
 data GoFieldType = GoFieldType { 
-      getFieldTag  :: Maybe String, 
+      getFieldTag  :: Maybe GoLit, 
       getFieldId   :: [GoId], 
       getFieldType :: GoType }
                  | GoFieldAnon { 
-      getFieldTag  :: Maybe String, 
+      getFieldTag  :: Maybe GoLit, 
       getFieldPtr  :: Bool,
       getFieldType :: GoType } -- MUST be typename
                 deriving (Eq, Read, Show)

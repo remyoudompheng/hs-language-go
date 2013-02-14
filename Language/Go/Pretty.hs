@@ -123,9 +123,9 @@ instance Pretty GoMethSpec where
 
 -- fields in structs
 instance Pretty GoFieldType where
-  pretty (GoFieldType tag names typ) = ids <+> pretty typ <+> maybe empty quote tag
+  pretty (GoFieldType tag names typ) = ids <+> pretty typ <+> prettyMaybe tag
     where ids = commajoin names
-  pretty (GoFieldAnon tag ptr typ) = p <> pretty typ <+> maybe empty quote tag
+  pretty (GoFieldAnon tag ptr typ) = p <> pretty typ <+> prettyMaybe tag
     where p = if ptr then char '*' else empty
 
 instance Pretty GoRec where

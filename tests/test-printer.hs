@@ -21,7 +21,7 @@ check :: String -> GoSource -> Bool -> IO ()
 check filename x printit = do
       let printed = render (pretty x)
           ast2 = goParse filename printed
-          quit = if printit then exitFailure else return () :: IO ()
+          quit = if printit then (return () :: IO ()) else exitFailure
       case ast2 of
           Left x -> (putStrLn $ "ERROR: cannot parse prettied " ++ filename ++ ":" ++ (show x)) >> quit
           Right y ->

@@ -277,6 +277,7 @@ tokenEq (GoTokComment _ _) (GoTokComment _ _) = True
 tokenEq (GoTokInt _ _)     (GoTokInt _ _) = True
 tokenEq (GoTokReal   _ _)  (GoTokReal   _ _) = True
 tokenEq (GoTokImag  _ _)   (GoTokImag  _ _) = True
+tokenEq (GoTokStr  _ _)   (GoTokStr  _ _) = True
 tokenEq (GoTokId _) (GoTokId _) = True
 tokenEq (GoTokOp _) (GoTokOp _) = True
 tokenEq a b = a == b

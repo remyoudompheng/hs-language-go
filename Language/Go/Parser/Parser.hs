@@ -130,16 +130,21 @@ goStructType = do
 goFieldDecl :: GoParser GoFieldType
 goFieldDecl = (try field) <|> anonymous where
 
+    parseTag = do
+      let strlit = token (GoTokStr Nothing "")
+      GoTokStr (Just lit) s <- try strlit
+      return $ GoLitStr lit s
+
     field = do -- Go @FieldDecl@
       ids <- goIdentifierList
       t <- goType
-      tag <- optionMaybe (try goString) -- Go @Tag@
+      tag <- optionMaybe parseTag
       return $ GoFieldType tag ids t
 
     anonymous = do -- Go @AnonymousField@
       a <- optionMaybe goTokAsterisk -- "*"
       t <- goTypeName -- TypeName
-      tag <- optionMaybe (try goString) -- Go @Tag@
+      tag <- optionMaybe parseTag
       return $ GoFieldAnon tag (isJust a) t
 
 -- | Standard @PointerType@
@@ -1136,10 +1141,8 @@ goSemi = goAfter goTokSemicolon
 
 goString :: GoParser String
 goString = do
-  (GoTokenPos _ tok) <- anyToken
-  case tok of
-    (GoTokStr rep uni) -> return uni
-    _ -> fail "String: what?"
+  GoTokStr rep uni <- token (GoTokStr Nothing "")
+  return uni
 
 goParen :: GoParser a -> GoParser a
 goParen p = do
