@@ -75,9 +75,9 @@ instance Pretty GoDecl where
   pretty (GoType specs)  = prettySpecs "type" specs
   pretty (GoVar specs)   = prettySpecs "var" specs
   pretty (GoFunc (GoFuncDecl name sig block)) =
-    prettyBlock (text "func" <+> pretty name <+> pretty sig) block
+    prettyBlock (text "func" <+> pretty name <> pretty sig) block
   pretty (GoMeth (GoMethDecl recv name sig block)) =
-    prettyBlock (text "func" <+> pretty recv <+> pretty name <+> pretty sig) block
+    prettyBlock (text "func" <+> parens (pretty recv) <+> pretty name <> pretty sig) block
 
 instance Pretty GoPrel where
   pretty (GoImportDecl specs) = prettySpecs "import" specs
@@ -90,6 +90,7 @@ instance Pretty GoImpSpec where
 instance Pretty GoCVSpec where
   pretty (GoCVSpec lhs typ rhs) = commajoin lhs
                               <+> prettyMaybe typ
+                              <+> equals
                               <+> commajoin rhs
 
 instance Pretty GoTypeSpec where
@@ -128,7 +129,7 @@ instance Pretty GoFieldType where
     where p = if ptr then char '*' else empty
 
 instance Pretty GoRec where
-  pretty (GoRec ptr name typ) = prettyMaybe name <+> p <+> pretty typ
+  pretty (GoRec ptr name typ) = prettyMaybe name <+> p <> pretty typ
     where p = if ptr then char '*' else empty
 
 -- function signatures
@@ -160,8 +161,8 @@ instance Pretty GoStmt where
   pretty GoStmtFallthrough = text "fallthrough"
 
   pretty (GoStmtIf cond blk stmt) = prettyBlock (text "if" <+> pretty cond) blk
-    <+> text "else" <+> prettyMaybe stmt
-  pretty (GoStmtFor clause blk) = empty -- FIXME
+    <+> maybe empty (\s -> text "else" <+> pretty s) stmt
+  pretty (GoStmtFor clause blk) = prettyBlock (text "for") blk -- FIXME
   pretty (GoStmtSwitch cond cases) = empty -- FIXME
   pretty (GoStmtTypeSwitch cond cases var) = empty -- FIXME
   pretty (GoStmtSelect cases) = empty -- FIXME
@@ -169,7 +170,13 @@ instance Pretty GoStmt where
   pretty (GoStmtBlock blk) = prettyBlock empty blk
 
 instance Pretty GoSimp where
-  pretty _ = empty -- FIXME
+  pretty GoSimpEmpty = text "" 
+  pretty (GoSimpSend left right) = pretty left <+> text "<-" <+> pretty right
+  pretty (GoSimpExpr expr) = pretty expr
+  pretty (GoSimpInc expr) = pretty expr <> text "++"
+  pretty (GoSimpDec expr) = pretty expr <> text "--"
+  pretty (GoSimpAsn lhs (GoOp op) rhs) = commajoin lhs <+> text op <+> commajoin rhs
+  pretty (GoSimpVar lhs rhs) = commajoin lhs <+> text ":=" <+> commajoin rhs
 
 instance Pretty GoCond where
   pretty _ = empty -- FIXME
@@ -179,4 +186,47 @@ instance Pretty GoCond where
 --
 
 instance Pretty GoExpr where
-  pretty _ = empty -- FIXME
+  pretty (GoPrim prim) = pretty prim
+  pretty (Go1Op (GoOp op) expr) = text op <> pretty expr
+  pretty (Go2Op (GoOp op) expr1 expr2) = pretty expr1 <+> text op <+> pretty expr2
+
+instance Pretty GoPrim where
+  pretty (GoLiteral lit)   = pretty lit
+  pretty (GoQual pkg name) = qual pkg name
+  pretty (GoMethod typ name) = pretty typ <> char '.' <> pretty name
+  pretty (GoSelect left right) = pretty left <> char '.' <> pretty right
+  pretty (GoParen expr)    = parens $ pretty expr
+  pretty (GoCast typ expr) = pretty typ <> parens (pretty expr) -- FIXME paren
+  pretty (GoNew typ)       = text "new" <> parens (pretty typ)
+  pretty (GoMake typ exprs) = case exprs of
+    [] -> text "make" <> parens (pretty typ)
+    _  -> text "make" <> parens (pretty typ <> comma <+> commajoin exprs)
+  pretty (GoIndex expr idx) = pretty expr <> brackets (pretty idx)
+  pretty (GoCall func args variadic) = pretty func <> parens a
+    where a = commajoin args <> (if variadic then text "..." else empty)
+  -- FIXME
+  pretty _ = empty
+
+instance Pretty GoLit where
+  pretty (GoLitInt s _)  = text s
+  pretty (GoLitReal s _) = text s
+  pretty (GoLitImag s _) = text s
+  pretty (GoLitChar s _) = text s
+  pretty (GoLitStr s _)  = text s
+  pretty (GoLitFunc (GoFuncExpr sig blk)) = prettyBlock (text "func" <> pretty sig) blk
+  pretty (GoLitComp typ comp) = case comp of
+    GoComp [] -> pretty typ <> lbrace <> rbrace
+    GoComp (x@(GoElement GoKeyNone _):xs) -> pretty typ <> braces (commajoin (x:xs))
+    -- TODO: fields <+> values
+    GoComp elems -> (pretty typ <> lbrace)
+                $+$ indent (vcat [pretty e <> comma | e <-  elems])
+                $+$ rbrace
+
+instance Pretty GoElement where
+  pretty (GoElement k v) = key k <+> value v
+    where key GoKeyNone = empty
+          key (GoKeyField fld) = pretty fld <> colon
+          key (GoKeyIndex expr) = pretty expr <> colon
+          value (GoValueExpr expr) = pretty expr
+          value (GoValueComp (GoComp elems)) = braces $ commajoin elems
+

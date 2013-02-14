@@ -90,9 +90,9 @@ data GoType = GoTypeName (Maybe GoId) GoId
 --                   | GoOChan
 --                   | GoIOChan
 
-data GoChanKind = GoIChan  -- 1
-                | GoOChan  -- 2
-                | GoIOChan -- 3
+data GoChanKind = GoIChan  -- <-chan
+                | GoOChan  -- chan<-
+                | GoIOChan -- chan
                 deriving (Eq, Read, Show)
 
 -- GoFieldType

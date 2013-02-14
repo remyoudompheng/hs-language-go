@@ -54,7 +54,9 @@ Library
     base == 4.*,
     array >= 0,
     parsec >= 3,
-    utf8-string >= 0
+    utf8-string >= 0,
+    pretty >= 1.1
+
   Exposed-Modules:
     Language.Go,
     Language.Go.Parser,
@@ -76,7 +78,7 @@ Library
 
 executable tests
     main-is:    tests.hs
-    -- ghc-options: -Wall
+    ghc-options: -W
 
     Build-Depends:
         base == 4.*,
