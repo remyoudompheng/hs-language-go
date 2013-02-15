@@ -50,6 +50,8 @@ testFor1 = testRoundTrip "for with assign" goStatement "for k, v = range m {}"
 testFor2 = testRoundTrip "for with assigndecl" goStatement "for k, v := range m {}"
 testFor3 = testRoundTrip "for with deref call" goStatement "for *getvar(&i), *getvar(&v) = range m {}"
 
+testLabel = testRoundTrip "labelled empty stmt" goStatement "{ label: ; for {} }"
+
 testsPretty :: [Test]
 testsPretty =
   [ testConstEmpty
@@ -66,4 +68,5 @@ testsPretty =
   , testTypeSwitch
   , testSignature
   , testFor1
-  , testFor2 ]
+  , testFor2
+  , testLabel ]

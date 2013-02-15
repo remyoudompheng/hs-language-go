@@ -157,6 +157,7 @@ instance Pretty GoParam where
 instance Pretty GoStmt where
   pretty (GoStmtDecl dcl) = pretty dcl
   pretty (GoStmtLabeled label stmt) = (pretty label <> colon) $+$ pretty stmt
+    <> if stmt == GoStmtSimple GoSimpEmpty then semi else empty
   pretty (GoStmtSimple stmt) = pretty stmt
 
   pretty (GoStmtGo call) = text "go" <+> pretty call
