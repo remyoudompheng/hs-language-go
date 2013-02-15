@@ -303,13 +303,13 @@ goTopLevelDecl =  goDeclaration
 --
 -- See also: SS. 9.5. Constant declarations
 goConstDecl :: GoParser GoDecl
-goConstDecl = goTokConst >> liftM GoConst (goParenish goConstSpec)
+goConstDecl = goTokConst >> liftM GoConst (goParenish $ try goConstSpec)
 
 -- | Standard @ConstSpec@
 goConstSpec :: GoParser GoCVSpec
 goConstSpec = do
   id <- goIdentifierList
-  try (goConstSpec' id) <|> goConstSpec'' id where
+  option (GoCVSpec id Nothing []) (try (goConstSpec' id) <|> goConstSpec'' id) where
 
     goConstSpec' :: [GoId] -> GoParser GoCVSpec
     goConstSpec' ids = do
@@ -328,7 +328,7 @@ goConstSpec = do
 --
 -- See also: SS. 9.5. Constant declarations
 goIdentifierList :: GoParser [GoId]
-goIdentifierList = sepBy goIdentifier goTokComma
+goIdentifierList = sepBy1 goIdentifier goTokComma
 
 -- | Standard @ExpressionList@
 --

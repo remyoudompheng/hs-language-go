@@ -31,6 +31,16 @@ testConst2 = testParse "const decl on one line"
     goStatement "const A = 1 " $
     GoStmtDecl $ GoConst [GoCVSpec [GoId "A"] Nothing [GoPrim $ GoLiteral $ GoLitInt "1" 1]]
 
+testConst3 = testParse "const iota"
+    goStatement "const ( A = iota; B; C )" $
+    GoStmtDecl (GoConst [
+      GoCVSpec [GoId "A"] Nothing [ident "iota"]
+    , GoCVSpec [GoId "B"] Nothing []
+    , GoCVSpec [GoId "C"] Nothing []])
+
+testConst4 = testParseFail "const truncated"
+    goStatement "const"
+
 testBuiltin1 = testParse "test builtin make"
     goExpression "make([]int, 4)" $
     GoPrim $ GoMake (GoSliceType (namedType "int")) [GoPrim $ GoLiteral $ GoLitInt "4" 4]
@@ -144,6 +154,8 @@ testsParser =
   [ testImport1
   , testConst1
   , testConst2
+  , testConst3
+  , testConst4
   , testBuiltin1
   , testConversion1
   , testConversion2

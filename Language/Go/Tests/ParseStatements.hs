@@ -98,6 +98,14 @@ testFor4 = testParse "range loop with blank"
       (GoBlock [])
   where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
 
+testFor6 = testParse "range loop with deref call"
+    goStatement "for *getvar(a), *getvar(b) = range m {}" $
+    GoStmtFor (GoForRange
+      [ Go1Op (GoOp "*") (GoPrim (GoCall getvar [ident "a"] False))
+      , Go1Op (GoOp "*") (GoPrim (GoCall getvar [ident "b"] False))
+      ] (ident "m") False) (GoBlock [])
+  where getvar = GoQual Nothing (GoId "getvar")
+
 testIf1 = testParse "if statement with init"
     goStatement "if v, ok := F(); ok {}" $
     GoStmtIf
@@ -173,6 +181,7 @@ testsParseStmts =
   , testFor2
   , testFor3
   , testFor4
+  , testFor6
   , testIf1
   , testIf2
   , testIf3
