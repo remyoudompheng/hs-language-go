@@ -181,7 +181,7 @@ data GoBlock = GoBlock { getStmt::[GoStmt] }
 
 data GoForClause = GoForWhile (Maybe GoExpr)
                  | GoForThree GoSimp (Maybe GoExpr) GoSimp
-                 | GoForRange [GoExpr] GoExpr -- FIXME: differentiate := and =
+                 | GoForRange [GoExpr] GoExpr Bool -- True if AssignDecl
                 deriving (Eq, Read, Show)
 
 data GoStmt = GoStmtDecl GoDecl -- 'Statement/Declaration'

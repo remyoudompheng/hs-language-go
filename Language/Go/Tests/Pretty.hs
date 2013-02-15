@@ -40,9 +40,15 @@ testConversion = testRoundTrip "conversion to pointer" goExpression "(*[]T)(p)"
 testConversionFunc = testRoundTrip "conversion to function" goExpression "(func())(x)"
 testConversionChan = testRoundTrip "conversion to recv chan" goExpression "(<-chan int)(x)"
 
+testDeref = testRoundTrip  "deref of function call" goExpression "*T(x)"
+
 testTypeSwitch = testRoundTrip "type switch" goStatement "switch nerr := <-c; err := nerr.(type) {}"
 
 testSignature = testRoundTrip "function signature" goType "func() (x)"
+
+testFor1 = testRoundTrip "for with assign" goStatement "for k, v = range m {}"
+testFor2 = testRoundTrip "for with assigndecl" goStatement "for k, v := range m {}"
+testFor3 = testRoundTrip "for with deref call" goStatement "for *getvar(&i), *getvar(&v) = range m {}"
 
 testsPretty :: [Test]
 testsPretty =
@@ -56,5 +62,8 @@ testsPretty =
   , testConversion
   , testConversionFunc
   , testConversionChan
+  , testDeref
   , testTypeSwitch
-  , testSignature ]
+  , testSignature
+  , testFor1
+  , testFor2 ]

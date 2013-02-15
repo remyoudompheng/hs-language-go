@@ -92,11 +92,14 @@ testFor3 = testParse "empty for"
 
 testFor4 = testParse "range loop with blank"
     goStatement "for _, order := range [...]Order{LSB, MSB} {}" $
-    GoStmtFor (GoForRange [ident "_", ident "order"] $
-      GoPrim $ GoLiteral $ GoLitComp (GoEllipsisType $ namedType "Order") $
-      GoComp [elem "LSB", elem "MSB"])
-      (GoBlock [])
+    GoStmtFor (GoForRange [ident "_", ident "order"] rhs True) (GoBlock [])
   where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
+        rhs = GoPrim $ GoLiteral $ GoLitComp (GoEllipsisType $ namedType "Order") $
+              GoComp [elem "LSB", elem "MSB"]
+
+testFor5 = testParse "range loop with simple ="
+    goStatement "for k, v = range m {}" $
+    GoStmtFor (GoForRange [ident "k", ident "v"] (ident "m") False) (GoBlock [])
 
 testFor6 = testParse "range loop with deref call"
     goStatement "for *getvar(a), *getvar(b) = range m {}" $
@@ -181,6 +184,7 @@ testsParseStmts =
   , testFor2
   , testFor3
   , testFor4
+  , testFor5
   , testFor6
   , testIf1
   , testIf2

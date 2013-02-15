@@ -201,7 +201,8 @@ instance Pretty GoCond where
 instance Pretty GoForClause where
   pretty (GoForWhile expr) = prettyMaybe expr
   pretty (GoForThree init cond incr) = pretty init <> semi <+> prettyMaybe cond <> semi <+> pretty incr
-  pretty (GoForRange lhs rhs) = commajoin lhs <+> text ":=" <+> text "range" <+> pretty rhs -- FIXME
+  pretty (GoForRange lhs rhs isdecl) = commajoin lhs <+> op <+> text "range" <+> pretty rhs
+    where op = if isdecl then text ":=" else equals
 
 instance Pretty a => Pretty (GoCase a) where
   pretty (GoCase items stmts) = p1 $+$ indent p2

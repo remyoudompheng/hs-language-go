@@ -119,6 +119,10 @@ testCall4 = testParse "call variadic with trailing comma after args"
     goExpression "f(a,b,c...,)" $
     GoPrim $ GoCall (GoQual Nothing $ GoId "f") (map ident ["a", "b", "c"]) True
 
+testCall5 = testParse "deref of call"
+    goExpression "*T(x)" $
+    Go1Op (GoOp "*") (GoPrim (GoCall (GoQual Nothing $ GoId "T") [ident "x"] False))
+
 testMethod1 = testParse "method call"
     goExpression "time.Now()" $
     GoPrim $ GoCall (GoQual (Just $ GoId "time") (GoId "Now")) [] False
@@ -170,6 +174,7 @@ testsParser =
   , testCall2
   , testCall3
   , testCall4
+  , testCall5
   , testMethod1
   , testMethod2
   , testSelector1

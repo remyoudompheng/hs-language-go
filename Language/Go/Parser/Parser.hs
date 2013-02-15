@@ -939,13 +939,12 @@ goForClause = do
 goRangeClause :: GoParser GoForClause
 goRangeClause = do
   k <- goExpression
-  v <- optionMaybe (goTokComma >> goPrimaryExpr)
+  v <- optionMaybe (goTokComma >> goUnaryExpr)
   p <- goAnyEqual
   goTokRange
   e <- goExpression
-  return $ case v of
-    Nothing -> GoForRange [k] e
-    Just v  -> GoForRange [k,v] e
+  let lhs = case v of { Nothing -> [k]; Just v -> [k,v] }
+  return $ GoForRange lhs e (p == GoOp ":=")
 
 -- Nonstandard
 goAnyEqual :: GoParser GoOp
