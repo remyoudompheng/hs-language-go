@@ -11,7 +11,7 @@ for TEST in tests/*.go $(find ${DIR} -name '*\.go' "!" -path "*/testdata/*") ; d
         echo "FAIL: $TEST"
         continue
     fi
-    tests/test-printer $TEST False
+    tests/test-printer $TEST False || echo "ERROR: $TEST"
 done
 
 exit 0

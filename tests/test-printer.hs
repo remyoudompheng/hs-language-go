@@ -20,14 +20,16 @@ main = do
 check :: String -> GoSource -> Bool -> IO ()
 check filename x printit = do
       let printed = render (pretty x)
-          ast2 = goParse filename printed
-          quit = if printit then (return () :: IO ()) else exitFailure
-      case ast2 of
-          Left x -> (putStrLn $ "ERROR: cannot parse prettied " ++ filename ++ ":" ++ (show x)) >> quit
-          Right y ->
-            if not (x == y) then
-                putStrLn ("ERROR:" ++ filename ++ ": pretty printed does not match") >> quit
-            else
-                return ()
-      if printit then putStr printed else return ()
+      if printit then
+          putStr printed
+      else do
+          let ast2 = goParse filename printed
+          case ast2 of
+              Left x -> (putStrLn $ "ERROR: cannot parse prettied " ++ filename ++ ":" ++ (show x)) >> exitFailure
+              Right y ->
+                 if not (x == y) then
+                     putStrLn ("ERROR:" ++ filename ++ ": pretty printed does not match") >> exitFailure
+                 else
+                     return ()
+
 

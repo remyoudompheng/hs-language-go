@@ -75,6 +75,21 @@ testString4 = testLex "string literal with octal escaping"
   [ GoTokStr (Just "\"\\377\"") "\xff"
   , GoTokSemicolon]
 
+testFloat1 = testLex "floating point"
+  "11."
+  [ GoTokReal (Just "11.") 11
+  , GoTokSemicolon]
+
+testFloat2 = testLex "floating point"
+  "11.e+3"
+  [ GoTokReal (Just "11.e+3") 11e+3
+  , GoTokSemicolon]
+
+testFloat3 = testLex "floating point"
+  ".5"
+  [ GoTokReal (Just ".5") 0.5
+  , GoTokSemicolon]
+
 testId1 = testLex "non-ASCII identifier"
   "α := 2"
   [ GoTokId "α"
@@ -102,6 +117,9 @@ testsLexer =
   , testString2
   , testString3
   , testString4
+  , testFloat1
+  , testFloat2
+  , testFloat3
   , testId1
   , testComment1
   , testComment2

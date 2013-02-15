@@ -75,7 +75,7 @@ module Language.Go.Parser.Tokens (
   exitParen,
 ) where
 
-import Numeric (readHex, readOct)
+import Numeric (readDec, readHex, readOct, readFloat)
 import Data.Maybe (mapMaybe)
 import Data.Char (chr, isOctDigit)
 
@@ -206,13 +206,34 @@ tokenFromComment False s = GoTokComment False $ drop 2 $ init s -- strip // and 
 tokenFromComment True  s = GoTokComment True  $ drop 2 $ init $ init s -- strip /* and */
 
 tokenFromInt :: String -> GoToken
-tokenFromInt s = GoTokInt (Just s) $ ((read s) :: Integer)
+tokenFromInt s = tok where
+  num = case s of
+    '0':'x':h -> readHex h
+    '0':'X':h -> readHex h
+    '0':_ -> readOct s
+    _ -> readDec s
+  tok = case num of
+    (x, ""):_ -> GoTokInt (Just s) x
+    _ -> GoTokInvalid s
+
+parseFloat s = readFloat (before ++ after)
+  where (bef, af) = break (== '.') s
+        before = if (bef == "") && not (null af) then '0':bef else bef
+        after = case af of
+                  "." -> ".0"
+                  '.':'e':s -> ".0e" ++ s
+                  '.':'E':s -> ".0E" ++ s
+                  _ -> af
 
 tokenFromReal :: String -> GoToken
-tokenFromReal s = GoTokReal (Just s) $ (read s)
+tokenFromReal s = case parseFloat s of
+  (x, ""):_ -> GoTokReal (Just s) x
+  _ -> GoTokInvalid s
 
 tokenFromImag :: String -> GoToken
-tokenFromImag s = GoTokImag (Just s) $ (read $ init s)
+tokenFromImag s = case parseFloat (init s) of
+  (x, ""):_ -> GoTokImag (Just s) x
+  _ -> GoTokInvalid s
 
 tokenFromRawStr :: String -> GoToken
 tokenFromRawStr s = GoTokStr (Just s) (init $ tail s)
