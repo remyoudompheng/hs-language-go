@@ -30,9 +30,18 @@ testMethod = testRoundTrip "method expression" goExpression "(*T).Method"
 testStructTag = testRoundTrip "struct tag" goType "struct { Field T `tag` }"
 
 testConversion = testRoundTrip "conversion to pointer" goExpression "(*[]T)(p)"
+testConversionFunc = testRoundTrip "conversion to function" goExpression "(func())(x)"
+testConversionChan = testRoundTrip "conversion to recv chan" goExpression "(<-chan int)(x)"
+
+testTypeSwitch = testRoundTrip "type switch" goStatement "switch nerr := <-c; err := nerr.(type) {}"
+
+testSignature = testRoundTrip "function signature" goType "func() (x)"
 
 testsPretty :: [Test]
 testsPretty =
   [ testMethod
   , testStructTag
-  , testConversion ]
+  , testConversion
+  , testConversionFunc
+  , testTypeSwitch
+  , testSignature ]

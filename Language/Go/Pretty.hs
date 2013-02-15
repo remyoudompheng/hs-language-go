@@ -169,9 +169,11 @@ instance Pretty GoStmt where
   pretty (GoStmtFor clause blk) = prettyBlock (text "for" <+> pretty clause) blk
   pretty (GoStmtSwitch cond cases) = prettySwitch (text "switch" <+> pretty cond) cases
   pretty (GoStmtTypeSwitch cond cases var) = prettySwitch prefix cases
-    where lhs = maybe empty (\v -> pretty v <+> text ":=") var
-          rhs = pretty cond <> text ".(type)"
-          prefix = text "switch" <+> lhs <+> rhs
+    where GoCond initstmt expr = cond
+          lhs = maybe empty (\v -> pretty v <+> text ":=") var
+          rhs = prettyMaybe expr <> text ".(type)"
+          maybesemi = if isJust initstmt then semi else empty
+          prefix = text "switch" <+> prettyMaybe initstmt <> maybesemi <+> lhs <+> rhs
   pretty (GoStmtSelect cases) = prettySwitch (text "select") cases
 
   pretty (GoStmtBlock blk) = prettyBlock empty blk
@@ -230,6 +232,10 @@ instance Pretty GoPrim where
   pretty (GoParen expr)    = parens $ pretty expr
   pretty (GoCast typ expr) = conv typ <> parens (pretty expr)
     where conv typ@(GoPointerType _) = parens $ pretty typ
+          -- "if the type starts with the keyword func and has no result
+          -- list, it must be parenthesized"
+          conv typ@(GoFunctionType (GoSig _ [])) = parens $ pretty typ
+          conv typ@(GoChannelType GoIChan _) = parens $ pretty typ
           conv typ@(_) = pretty typ
   pretty (GoNew typ)       = text "new" <> parens (pretty typ)
   pretty (GoMake typ exprs) = case exprs of
@@ -250,7 +256,7 @@ instance Pretty GoLit where
   pretty (GoLitFunc (GoFuncExpr sig blk)) = prettyBlock (text "func" <> pretty sig) blk
   pretty (GoLitComp typ comp) = case comp of
     GoComp [] -> pretty typ <> lbrace <> rbrace
-    GoComp (x@(GoElement GoKeyNone _):xs) -> pretty typ <> braces (commajoin (x:xs))
+    GoComp (x@(GoElement GoKeyNone (GoValueExpr _)):xs) -> pretty typ <> braces (commajoin (x:xs))
     -- TODO: fields <+> values
     GoComp elems -> (pretty typ <> lbrace)
                 $+$ indent (vcat [pretty e <> comma | e <-  elems])
