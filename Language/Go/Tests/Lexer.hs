@@ -106,6 +106,14 @@ testComment2 = testLex "comment with non-ASCII characters"
   "/*\n\tαβ\n*/"
   [ GoTokComment True "\n\tαβ\n" ]
 
+testComment3 = testLex "comment with odd number of stars"
+  "/***/"
+  [ GoTokComment True "*" ]
+
+testComment4 = testLex "comment with many stars"
+  "/******\n ******/"
+  [ GoTokComment True "*****\n *****" ]
+
 testsLexer =
   [ testRawString1
   , testRawString2
@@ -123,4 +131,6 @@ testsLexer =
   , testId1
   , testComment1
   , testComment2
+  , testComment3
+  , testComment4
   ]

@@ -24,9 +24,9 @@ $sign           = [\+\-]
 
 -- SS. 4.1. Comments
 @ol_char    = [^\n]
-@ml_char    = ([$printable $white] # \*)|\*([$printable $white] # \/)
+@ml_char    = ([$printable $white] # \*)|(\*+([$printable $white] # \/))
 @ol_comment = "//"(@ol_char)*\n
-@ml_comment = "/*"(@ml_char)*"*/"
+@ml_comment = "/*" (@ml_char)* [\*]? "*/"
 
 -- SS. 4.2. Tokens
 $whitespace = [\ \t\f\v\r]

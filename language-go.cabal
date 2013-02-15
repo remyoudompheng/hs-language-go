@@ -87,3 +87,5 @@ executable tests
         pretty >= 1.1,
         HUnit
 
+    Other-Modules:
+        Language.Go.Parser.Lexer

@@ -24,6 +24,7 @@ dist:
 .PHONY: clean
 clean:
 	$(RUNHS) Setup clean
+	rm -f Language/Go/Parser/Lexer.hs
 	find . -name '*.hi' -delete
 	find . -name '*.o' -delete
 
