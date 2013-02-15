@@ -309,7 +309,7 @@ goConstDecl = goTokConst >> liftM GoConst (goParenish goConstSpec)
 goConstSpec :: GoParser GoCVSpec
 goConstSpec = do
   id <- goIdentifierList
-  option (GoCVSpec id Nothing []) (try (goConstSpec' id) <|> goConstSpec'' id) where         
+  try (goConstSpec' id) <|> goConstSpec'' id where
 
     goConstSpec' :: [GoId] -> GoParser GoCVSpec
     goConstSpec' ids = do

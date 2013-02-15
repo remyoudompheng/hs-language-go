@@ -25,9 +25,16 @@ testRoundTrip desc parser s = TestLabel desc $ TestCase $ assertEqual desc ast1 
                  Right a  -> stringify $ parse (render $ pretty a)
         stringify s = case s of { Left e -> Left (show e); Right a -> Right a }
 
+testConstEmpty = testRoundTrip "empty const decl" goStatement "const ()"
+
 testMethod = testRoundTrip "method expression" goExpression "(*T).Method"
 
 testStructTag = testRoundTrip "struct tag" goType "struct { Field T `tag` }"
+
+testChanChan1 = testRoundTrip "chan of chans 1" goType "chan<- (chan<- (chan int))"
+testChanChan2 = testRoundTrip "chan of chans 2" goType "<-chan (<-chan (chan int))"
+testChanChan3 = testRoundTrip "chan of chans 3" goType "chan(<-chan int)"
+testChanChan4 = testRoundTrip "chan of chans 4" goType "chan<-(chan int)"
 
 testConversion = testRoundTrip "conversion to pointer" goExpression "(*[]T)(p)"
 testConversionFunc = testRoundTrip "conversion to function" goExpression "(func())(x)"
@@ -39,9 +46,15 @@ testSignature = testRoundTrip "function signature" goType "func() (x)"
 
 testsPretty :: [Test]
 testsPretty =
-  [ testMethod
+  [ testConstEmpty
+  , testMethod
   , testStructTag
+  , testChanChan1
+  , testChanChan2
+  , testChanChan3
+  , testChanChan4
   , testConversion
   , testConversionFunc
+  , testConversionChan
   , testTypeSwitch
   , testSignature ]

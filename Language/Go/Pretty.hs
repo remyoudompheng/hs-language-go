@@ -107,11 +107,15 @@ instance Pretty GoType where
   pretty (GoSliceType elem) = text "[]" <> pretty elem
   pretty (GoPointerType elem) = char '*' <> pretty elem
   pretty (GoMapType key elem) = text "map[" <> pretty key <> rbrack <> pretty elem
-  pretty (GoChannelType dir elem) = text chan <+> pretty elem
+  pretty (GoChannelType dir elem) = text chan <+> par (pretty elem)
     where chan = case dir of
             GoIChan ->  "<-chan"
             GoOChan ->  "chan<-"
             GoIOChan -> "chan"
+          par = case (dir, elem) of
+            (GoOChan, (GoChannelType GoIOChan _)) -> parens
+            (GoIOChan, (GoChannelType GoIChan _)) -> parens
+            _ -> id
   pretty (GoFunctionType sig) = text "func" <> pretty sig
   pretty (GoInterfaceType specs) = prettyFields "interface" specs
   pretty (GoStructType specs) = prettyFields "struct" specs
