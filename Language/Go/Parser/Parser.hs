@@ -7,13 +7,16 @@
 
 {- LANGUAGE CPP -}
 module Language.Go.Parser.Parser (
-  -- Tokenizer and top-level parser.
-  goTokenize,
+  -- * All-in-one parsers
   goParse,
-  goParseTokens,
   goParseFileWith,
   goParseTestWith,
 
+  -- * Tokenizing and parsing a token stream
+  goTokenize,
+  goParseTokens,
+
+  -- * Parsers for main language elements
   goSource,
   goImportDecl,
   goTopLevelDecl,
@@ -40,8 +43,6 @@ import Text.Parsec.Combinator
 -- This is where semicolons are inserted into the token stream.
 -- We also filter out comments here, so any comment processing
 -- must occur before this stage.
---
--- TODO: Unicode identifiers
 --
 -- See also: 4.3. Semicolons
 goTokenize :: String -> [GoTokenPos]
@@ -271,7 +272,7 @@ goChannelQuip =  do goTokArrow ; goTokChan ; return GoIChan         -- 1=RecvDir
 --
 -- See also: SS. 8. Blocks
 goBlock :: GoParser GoBlock
-goBlock = do liftM GoBlock $ goBlockish goAnyStatement
+goBlock = do liftM GoBlock $ goBlockish goStatement
 
 -- | Nonstandard
 goBlockish :: GoParser a -> GoParser [a]
@@ -321,6 +322,11 @@ goConstSpec = do
       goTokEqual
       exs <- goExpressionList
       return $ GoCVSpec ids (Just typ) exs
+
+goIdentifier :: GoParser GoId
+goIdentifier = do
+  GoTokId name <- token $ GoTokId ""
+  return $ GoId name
 
 -- | Standard @IdentifierList@
 --
@@ -503,7 +509,6 @@ goCompositeLit :: GoParser GoLit
 goCompositeLit = do
   st <- getState
   ty <- goLiteralType
-  -- FIXME: allow T{} when parenthesized.
   case ty of
     GoTypeName _ _ -> if noComposite st && parenDepth st == 0 then fail "no T{} in condition" else return ()
     _ -> return ()
@@ -760,11 +765,6 @@ goStatement =  (liftM GoStmtDecl goDeclaration)   -- 'Statement/Declaration'
            <|> goForStmt
            <|> goDeferStmt
            <?> "statement"
-
--- | Nonstandard, TODO: remove this
-goAnyStatement :: GoParser GoStmt
-goAnyStatement =  goStatement
-              <?> "statement within a block"
 
 -- | Nonstandard simple statements (self-contained)
 --

@@ -10,6 +10,8 @@ module Language.Go.Pretty (
   Pretty(..),
 ) where
 
+-- TODO: tabwriter-like alignment of fields.
+
 import Data.List
 import Data.Maybe (isJust)
 import Text.PrettyPrint
@@ -264,7 +266,6 @@ instance Pretty GoLit where
   pretty (GoLitComp typ comp) = case comp of
     GoComp [] -> pretty typ <> lbrace <> rbrace
     GoComp (x@(GoElement GoKeyNone (GoValueExpr _)):xs) -> pretty typ <> braces (commajoin (x:xs))
-    -- TODO: fields <+> values
     GoComp elems -> (pretty typ <> lbrace)
                 $+$ indent (vcat [pretty e <> comma | e <-  elems])
                 $+$ rbrace

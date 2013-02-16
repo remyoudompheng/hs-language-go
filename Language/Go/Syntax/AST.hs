@@ -64,7 +64,6 @@ data GoRec = GoRec Bool (Maybe GoId) GoType
                 deriving (Eq, Read, Show)
 
 -- GoSig (= 'Signature')
--- FIXME: variadics?
 data GoSig = GoSig [GoParam] [GoParam]
                 deriving (Eq, Read, Show)
 
@@ -97,12 +96,12 @@ data GoChanKind = GoIChan  -- <-chan
                 deriving (Eq, Read, Show)
 
 -- GoFieldType
-data GoFieldType = GoFieldType { 
-      getFieldTag  :: Maybe GoLit, 
-      getFieldId   :: [GoId], 
+data GoFieldType = GoFieldType {
+      getFieldTag  :: Maybe GoLit,
+      getFieldId   :: [GoId],
       getFieldType :: GoType }
-                 | GoFieldAnon { 
-      getFieldTag  :: Maybe GoLit, 
+                 | GoFieldAnon {
+      getFieldTag  :: Maybe GoLit,
       getFieldPtr  :: Bool,
       getFieldType :: GoType } -- MUST be typename
                 deriving (Eq, Read, Show)

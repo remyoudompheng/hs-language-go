@@ -3,13 +3,21 @@
 -- Copyright   : (c) 2011 Andrew Robbins
 -- License     : GPLv3 (see COPYING)
 --
--- x
+-- This module defines Go tokens and the parser type.
+-- It also defines various utility functions for the lexer and parser.
+
 module Language.Go.Parser.Tokens (
+  -- * Parser
   GoParser,
   GoParserState(..),
+  runGoParser,
+
+  enterParen,
+  exitParen,
+
+  -- * Tokens and utilities for lexer
   GoToken(..),
   GoTokenPos(..),
-  runGoParser,
   insertSemi,
   stripComments,
 
@@ -25,6 +33,7 @@ module Language.Go.Parser.Tokens (
   unquoteChar,
   unquoteString,
 
+  -- * Parsers for elementary punctuation
   goTokLParen,
   goTokRParen,
   goTokLBrace,
@@ -40,6 +49,11 @@ module Language.Go.Parser.Tokens (
   goTokFullStop,
   goTokEllipsis,
 
+  goTokAsterisk,
+  goTokArrow,
+  goAssignOp,
+
+  -- * Parsers for keywords
   goTokBreak,
   goTokCase,
   goTokChan,
@@ -65,14 +79,6 @@ module Language.Go.Parser.Tokens (
   goTokSwitch,
   goTokType,
   goTokVar,
-
-  goTokAsterisk,
-  goTokArrow,
-
-  goIdentifier,
-  goAssignOp,
-  enterParen,
-  exitParen,
 ) where
 
 import Numeric (readDec, readHex, readOct, readFloat)
@@ -86,9 +92,6 @@ import qualified Text.Parsec.Prim as Prim
 import Text.Parsec.Pos (SourcePos, SourceName)
 import Text.Parsec.Error (ParseError)
 import Text.Parsec.Combinator
-
--- | GoTokener is the type used for all tokenizers
--- type GoTokener = GenParser Char () [GoToken]
 
 -- | GoParser is the type used for all parsers
 type GoParser a = GenParser GoTokenPos GoParserState a
@@ -351,11 +354,10 @@ appendSemi tokens = tokens ++ semi where
     semi = [GoTokenPos (lastpos $ last tokens) GoTokSemicolonAuto]
     lastpos (GoTokenPos pos _) = pos
 
+-- | @insertSemi@ performs semicolon insertion.
 insertSemi :: [GoTokenPos] -> [GoTokenPos]
 insertSemi = stripAuto . stripNone . 
              insertAfter . stripNone . appendSemi 
-
---insertSemi = insertAfter . stripNone . insertBefore . appendSemi
 
 insertAfter :: [GoTokenPos] -> [GoTokenPos]
 insertAfter [] = []
@@ -412,11 +414,6 @@ goTokSwitch   = token $ GoTokSwitch
 goTokType     = token $ GoTokType
 goTokVar      = token $ GoTokVar
 -- END keywords
-
-goIdentifier :: GoParser GoId
-goIdentifier = do
-  GoTokId name <- token $ GoTokId ""
-  return $ GoId name
 
 goOperator :: GoParser GoOp
 goOperator = do
