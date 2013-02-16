@@ -75,14 +75,15 @@ data GoParam = GoParam [GoId] GoType
 -- GoType (= 'Type' = 'TypeLit' = 'LiteralType')
 data GoType = GoTypeName (Maybe GoId) GoId
             | GoArrayType GoExpr GoType
-            | GoChannelType GoChanKind GoType  -- only in Decls
-            | GoEllipsisType GoType  -- only in Literals
+            | GoChannelType GoChanKind GoType
             | GoFunctionType GoSig
-            | GoInterfaceType [GoMethSpec] -- only in Decls
+            | GoInterfaceType [GoMethSpec]
             | GoMapType GoType GoType
-            | GoPointerType GoType   -- only in Decls
+            | GoPointerType GoType
             | GoSliceType GoType
             | GoStructType [GoFieldType]
+            | GoEllipsisType GoType  -- only in Literals
+            | GoVariadicType GoType  -- only in Funcs
                 deriving (Eq, Read, Show)
 
 

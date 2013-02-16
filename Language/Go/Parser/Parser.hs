@@ -207,14 +207,12 @@ goParameterDecl = (try goParameterDecl') <|> goParameterDecl'' where
     goParameterDecl' :: GoParser GoParam
     goParameterDecl' = do
       is <- option [] goIdentifierList
-      optional goTokEllipsis
-      t <- goType
+      t <- try goVariadicType <|> goType
       return $ GoParam is t
-    --  return $ flip map is (\i -> GoParam (Just i) t)
-    
+
     goParameterDecl'' :: GoParser GoParam
     goParameterDecl'' = do
-      t <- goType
+      t <- try goVariadicType <|> goType
       return $ GoParam [] t
 
 -- | Standard @InterfaceType@
@@ -522,6 +520,12 @@ goArrayEllipsisType = do
   goBracket goTokEllipsis
   t <- goType
   return $ GoEllipsisType t
+
+goVariadicType :: GoParser GoType
+goVariadicType = do
+  goTokEllipsis
+  t <- goType
+  return (GoVariadicType t)
 
 -- | Standard @LiteralType@
 --

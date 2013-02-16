@@ -21,7 +21,7 @@ testRoundTrip desc parser s = TestLabel desc $ TestCase $ assertEqual desc ast1 
   where parse = goParseTestWith (do { p <- parser; optional goTokSemicolon; eof; return p })
         ast1 = stringify $ parse s
         ast2 = case ast1 of
-                 Left err -> Left "cannot parse"
+                 Left _   -> Left "cannot parse"
                  Right a  -> stringify $ parse (render $ pretty a)
         stringify s = case s of { Left e -> Left (show e); Right a -> Right a }
 
@@ -45,6 +45,7 @@ testDeref = testRoundTrip  "deref of function call" goExpression "*T(x)"
 testTypeSwitch = testRoundTrip "type switch" goStatement "switch nerr := <-c; err := nerr.(type) {}"
 
 testSignature = testRoundTrip "function signature" goType "func() (x)"
+testSignature2 = testRoundTrip "function signature variadic" goType "func(a, b, c T, v ...U)"
 
 testFor1 = testRoundTrip "for with assign" goStatement "for k, v = range m {}"
 testFor2 = testRoundTrip "for with assigndecl" goStatement "for k, v := range m {}"
@@ -67,6 +68,8 @@ testsPretty =
   , testDeref
   , testTypeSwitch
   , testSignature
+  , testSignature2
   , testFor1
   , testFor2
+  , testFor3
   , testLabel ]

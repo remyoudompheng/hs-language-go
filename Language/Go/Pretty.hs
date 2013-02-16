@@ -104,6 +104,7 @@ instance Pretty GoType where
   pretty (GoTypeName pkg name) = qual pkg name
   pretty (GoArrayType len elem) = lbrack <> pretty len <> rbrack <> pretty elem
   pretty (GoEllipsisType elem) = text "[...]" <> pretty elem
+  pretty (GoVariadicType elem) = text "..." <> pretty elem
   pretty (GoSliceType elem) = text "[]" <> pretty elem
   pretty (GoPointerType elem) = char '*' <> pretty elem
   pretty (GoMapType key elem) = text "map[" <> pretty key <> rbrack <> pretty elem

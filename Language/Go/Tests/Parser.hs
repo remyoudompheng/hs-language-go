@@ -154,6 +154,22 @@ testIfaceDecl1 = testParse "interface decl with embedded qualified interface"
     goType "interface { io.Reader }" $
     GoInterfaceType [GoIfaceName (Just (GoId "io")) (GoId "Reader")]
 
+testFuncType1 = testParse "variadic func type"
+    goType "func(a, b, c T, v ...U)" $
+    GoFunctionType (GoSig
+      [ GoParam [GoId "a",GoId "b",GoId "c"] (namedType "T")
+      , GoParam [GoId "v"] (GoVariadicType $ namedType "U")
+      ] [])
+
+testFuncType2 = testParse "variadic func type without arg names"
+    goType "func(T, T, T, ...U)" $
+    GoFunctionType (GoSig
+      [ GoParam [] (namedType "T")
+      , GoParam [] (namedType "T")
+      , GoParam [] (namedType "T")
+      , GoParam [] (GoVariadicType $ namedType "U")
+      ] [])
+
 testsParser =
   [ testImport1
   , testConst1
@@ -181,4 +197,6 @@ testsParser =
   , testTypeAssert1
   , testStructDecl1
   , testIfaceDecl1
+  , testFuncType1
+  , testFuncType2
   ]
