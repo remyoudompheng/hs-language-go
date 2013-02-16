@@ -31,6 +31,9 @@ clean:
 install: all
 	sudo $(RUNHS) Setup install
 
+doc:
+	$(RUNHS) Setup haddock
+
 check: $(TESTAPPS)
 	bash ./tests.sh
 
