@@ -53,6 +53,7 @@ Library
   Build-Depends:
     base == 4.*,
     array >= 0,
+    containers,
     parsec >= 3,
     utf8-string >= 0,
     pretty >= 1.1
@@ -66,7 +67,8 @@ Library
     Language.Go.Parser.Operators,
     Language.Go.Pretty,
     Language.Go.Syntax,
-    Language.Go.Syntax.AST
+    Language.Go.Syntax.AST,
+    Language.Go.Analysis.Types
 
 --Executable test-lexer
 --  HS-Source-Dirs: tests/
@@ -83,6 +85,7 @@ executable tests
     Build-Depends:
         base == 4.*,
         array >= 0,
+        containers,
         parsec >= 3,
         pretty >= 1.1,
         HUnit
