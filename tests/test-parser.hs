@@ -1,10 +1,7 @@
 module Main where
 
 import System.Environment
-import Language.Go.Parser.Lexer
-import Language.Go.Parser.Parser
-import Language.Go.Parser.Tokens
-import Data.List
+import Language.Go.Parser.Parser (goParse)
 
 main = do
   [filename] <- getArgs

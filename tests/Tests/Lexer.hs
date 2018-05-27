@@ -1,16 +1,20 @@
 -- |
--- Module      : Language.Go.Tests.Lexer
+-- Module      : Tests.Lexer
 -- Copyright   : (c) 2013 Rémy Oudompheng
 -- License     : GPLv3 (see COPYING)
 -- 
 -- This module provides tests for the lexer.
 
-module Language.Go.Tests.Lexer (testsLexer) where
+module Tests.Lexer (testsLexer) where
 
 import Test.HUnit
 
 import Language.Go.Parser.Lexer
-import Language.Go.Parser.Tokens
+import Language.Go.Parser.Tokens (
+   GoToken(..)
+ , GoTokenPos(..)
+ , insertSemi
+ )
 
 testLex :: String -> String -> [GoToken] -> Test
 testLex desc text ref = TestLabel desc $ TestCase $ assertEqual desc ref toks

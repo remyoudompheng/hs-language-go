@@ -1,11 +1,11 @@
 -- |
--- Module      : Language.Go.Tests.Types
+-- Module      : Tests.Types
 -- Copyright   : (c) 2013 Rémy Oudompheng
 -- License     : GPLv3 (see COPYING)
 -- 
 -- This module provides tests for Go type system rules.
 
-module Language.Go.Tests.Types (testsTypes) where
+module Tests.Types (testsTypes) where
 
 import Test.HUnit
 

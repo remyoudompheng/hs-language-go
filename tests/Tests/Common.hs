@@ -1,12 +1,12 @@
 -- |
--- Module      : Language.Go.Tests.Common
+-- Module      : Tests.Common
 -- Copyright   : (c) 2013 Rémy Oudompheng
 -- License     : GPLv3 (see COPYING)
 -- 
 -- This module provides utility functions for concise syntax
 -- of test cases.
 
-module Language.Go.Tests.Common where
+module Tests.Common where
 
 import Test.HUnit
 

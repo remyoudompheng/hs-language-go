@@ -1,10 +1,8 @@
 module Main where
 
 import System.Environment
-import Language.Go.Parser.Lexer
 import Language.Go.Parser.Parser (goTokenize)
-import Language.Go.Parser.Tokens
-import Data.List
+import Language.Go.Parser.Tokens (GoTokenPos(..))
 
 showToken :: GoTokenPos -> String
 showToken (GoTokenPos _ x) = (show x)

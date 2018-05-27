@@ -1,16 +1,16 @@
 -- |
--- Module      : Language.Go.Tests.ParseStatements
+-- Module      : Tests.ParseStatements
 -- Copyright   : (c) 2013 Rémy Oudompheng
 -- License     : GPLv3 (see COPYING)
 -- 
 -- This module provides tests for parsing of statements.
 
-module Language.Go.Tests.ParseStatements (testsParseStmts) where
+module Tests.ParseStatements (testsParseStmts) where
 
 import Language.Go.Parser.Parser
 import Language.Go.Syntax.AST
 
-import Language.Go.Tests.Common
+import Tests.Common
 
 testSwitch1 = testParse "test switch with empty case"
     goStatement "switch x { case 1: case 2: default: return; }" $

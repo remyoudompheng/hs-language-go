@@ -1,12 +1,12 @@
 -- |
--- Module      : Language.Go.Tests.Pretty
+-- Module      : Tests.Pretty
 -- Copyright   : (c) 2013 Rémy Oudompheng
 -- License     : GPLv3 (see COPYING)
 -- 
 -- This module provides tests for the pretty-printer.
 --
 
-module Language.Go.Tests.Pretty (testsPretty) where
+module Tests.Pretty (testsPretty) where
 
 import Test.HUnit
 import Text.PrettyPrint (render)

@@ -1,9 +1,9 @@
 import Test.HUnit
-import Language.Go.Tests.Lexer
-import Language.Go.Tests.Parser
-import Language.Go.Tests.ParseStatements
-import Language.Go.Tests.Pretty
-import Language.Go.Tests.Types
+import Tests.Lexer
+import Tests.Parser
+import Tests.ParseStatements
+import Tests.Pretty
+import Tests.Types
 
 main :: IO Counts
 main = runTestTT $ TestList (testsLexer
