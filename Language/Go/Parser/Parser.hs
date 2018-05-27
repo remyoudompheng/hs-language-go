@@ -991,6 +991,7 @@ goCommCase = goCommCase' <|> goCommCase''
 goChanStmt :: GoParser GoChan
 goChanStmt = try (goSendStmt >>= convert) <|> goRecvStmt
     where convert (GoSimpSend x y) = return (GoChanSend x y)
+          convert _ = error "impossible"
 
 -- | Standard @RecvStmt@
 --
@@ -1144,7 +1145,7 @@ goSemi = goAfter goTokSemicolon
 
 goString :: GoParser String
 goString = do
-  GoTokStr rep uni <- token (GoTokStr Nothing "")
+  GoTokStr _ uni <- token (GoTokStr Nothing "")
   return uni
 
 goParen :: GoParser a -> GoParser a

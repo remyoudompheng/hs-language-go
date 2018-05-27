@@ -79,8 +79,9 @@ Library
 --  HS-Source-Dirs: tests/
 --  Main-is: test-parser.hs
 
-executable tests
+test-suite tests
     main-is:    tests.hs
+    type:       exitcode-stdio-1.0
     ghc-options: -W
 
     Build-Depends:
@@ -92,4 +93,16 @@ executable tests
         HUnit
 
     Other-Modules:
-        Language.Go.Parser.Lexer
+        Language.Go.Analysis.Types,
+        Language.Go.Parser.Lexer,
+        Language.Go.Parser.Operators,
+        Language.Go.Parser.Parser,
+        Language.Go.Parser.Tokens,
+        Language.Go.Pretty,
+        Language.Go.Syntax.AST,
+        Language.Go.Tests.Common,
+        Language.Go.Tests.Lexer,
+        Language.Go.Tests.Parser,
+        Language.Go.Tests.ParseStatements,
+        Language.Go.Tests.Pretty,
+        Language.Go.Tests.Types

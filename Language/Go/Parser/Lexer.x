@@ -78,8 +78,8 @@ $add_op     = [\+\-\|\^]
 
 tokens :-
 
-  $whitespace+    { \p s -> posify p $ GoTokNone }
-  $whiteline      { \p s -> posify p $ GoTokSemicolonAuto }
+  $whitespace+    { \p _ -> posify p $ GoTokNone }
+  $whiteline      { \p _ -> posify p $ GoTokSemicolonAuto }
   @ol_comment     { \p s -> posify p $ tokenFromComment False s }
   @ml_comment     { \p s -> posify p $ tokenFromComment True s }
   @int_lit        { \p s -> posify p $ tokenFromInt s }
@@ -162,7 +162,7 @@ tokens :-
 
 {
 posAlex2Parsec :: String -> AlexPosn -> SourcePos
-posAlex2Parsec filename (AlexPn o l c) = newPos filename l c
+posAlex2Parsec filename (AlexPn _ l c) = newPos filename l c
 
 posify :: AlexPosn -> GoToken -> GoTokenPos
 posify pos tok = GoTokenPos (posAlex2Parsec "" pos) tok
