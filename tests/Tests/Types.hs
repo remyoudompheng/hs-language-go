@@ -7,14 +7,15 @@
 
 module Tests.Types (testsTypes) where
 
-import Test.HUnit
+import Test.Tasty
+import Test.Tasty.HUnit
 
 import qualified Data.Map as M
 
 import Language.Go.Analysis.Types
 
-testAssignableTo :: Type -> Type -> Bool -> Test
-testAssignableTo t1 t2 t = TestLabel desc $ TestCase $ assertEqual desc t (assignableTo t1 t2)
+testAssignableTo :: Type -> Type -> Bool -> TestTree
+testAssignableTo t1 t2 t = testCase desc $ assertEqual desc t (assignableTo t1 t2)
   where desc = "test that " ++ typeString t1 ++ isornot ++ "assignable to " ++ typeString t2
         isornot = if t then " is " else " is not "
 
@@ -64,17 +65,20 @@ nM1 = NamedType "" "M1" uM []
 nP1 = NamedType "" "P1" uP []
 nS1 = NamedType "" "S1" uS []
 
-testsTypes = testA
-  ++ testB
-  ++ testC
-  ++ testF
-  ++ testI
-  ++ testM
-  ++ testP
-  ++ testS
+testsTypes :: TestTree
+testsTypes = testGroup "type system"
+  [ testA
+  , testB
+  , testC
+  , testF
+  , testI
+  , testM
+  , testP
+  , testS
+  ]
 
 -- tests from assign1
-testA =
+testA = testGroup "array"
   [ testAssignableTo nA  uA  True
   , testAssignableTo nA1 uA  True
   , testAssignableTo uA  nA  True
@@ -83,7 +87,7 @@ testA =
   , testAssignableTo nA  nA1 False
   ]
 
-testB =
+testB = testGroup "slice"
   [ testAssignableTo nB  uB  True
   , testAssignableTo nB1 uB  True
   , testAssignableTo uB  nB  True
@@ -92,7 +96,7 @@ testB =
   , testAssignableTo nB  nB1 False
   ]
 
-testC =
+testC = testGroup "chan"
   [ testAssignableTo nC  uC  True
   , testAssignableTo nC1 uC  True
   , testAssignableTo uC  nC  True
@@ -101,7 +105,7 @@ testC =
   , testAssignableTo nC  nC1 False
   ]
 
-testF =
+testF = testGroup "func"
   [ testAssignableTo nF  uF  True
   , testAssignableTo nF1 uF  True
   , testAssignableTo uF  nF  True
@@ -110,7 +114,7 @@ testF =
   , testAssignableTo nF  nF1 False
   ]
 
-testI =
+testI = testGroup "interface"
   [ testAssignableTo nI  uI  True
   , testAssignableTo nI1 uI  True
   , testAssignableTo uI  nI  True
@@ -119,7 +123,7 @@ testI =
   , testAssignableTo nI  nI1 True
   ]
 
-testM =
+testM = testGroup "map"
   [ testAssignableTo nM  uM  True
   , testAssignableTo nM1 uM  True
   , testAssignableTo uM  nM  True
@@ -128,7 +132,7 @@ testM =
   , testAssignableTo nM  nM1 False
   ]
 
-testP =
+testP = testGroup "pointer"
   [ testAssignableTo nP  uP  True
   , testAssignableTo nP1 uP  True
   , testAssignableTo uP  nP  True
@@ -137,7 +141,7 @@ testP =
   , testAssignableTo nP  nP1 False
   ]
 
-testS =
+testS = testGroup "struct"
   [ testAssignableTo nS  uS  True
   , testAssignableTo nS1 uS  True
   , testAssignableTo uS  nS  True

@@ -90,7 +90,8 @@ test-suite tests
         containers,
         parsec >= 3,
         pretty >= 1.1,
-        HUnit,
+        tasty,
+        tasty-hunit,
         language-go
 
     Other-Modules:

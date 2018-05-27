@@ -8,7 +8,8 @@
 
 module Tests.Pretty (testsPretty) where
 
-import Test.HUnit
+import Test.Tasty
+import Test.Tasty.HUnit
 import Text.PrettyPrint (render)
 import Text.Parsec.Combinator
 
@@ -16,8 +17,8 @@ import Language.Go.Parser.Tokens
 import Language.Go.Parser.Parser
 import Language.Go.Pretty
 
-testRoundTrip :: (Show a, Pretty a, Eq a) => String -> GoParser a -> String -> Test
-testRoundTrip desc parser s = TestLabel desc $ TestCase $ assertEqual desc ast1 ast2
+testRoundTrip :: (Show a, Pretty a, Eq a) => String -> GoParser a -> String -> TestTree
+testRoundTrip desc parser s = testCase desc $ assertEqual desc ast1 ast2
   where parse = goParseTestWith (do { p <- parser; optional goTokSemicolon; eof; return p })
         ast1 = stringify $ parse s
         ast2 = case ast1 of
@@ -53,8 +54,8 @@ testFor3 = testRoundTrip "for with deref call" goStatement "for *getvar(&i), *ge
 
 testLabel = testRoundTrip "labelled empty stmt" goStatement "{ label: ; for {} }"
 
-testsPretty :: [Test]
-testsPretty =
+testsPretty :: TestTree
+testsPretty = testGroup "pretty"
   [ testConstEmpty
   , testMethod
   , testStructTag

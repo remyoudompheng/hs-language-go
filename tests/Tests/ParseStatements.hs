@@ -10,6 +10,7 @@ module Tests.ParseStatements (testsParseStmts) where
 import Language.Go.Parser.Parser
 import Language.Go.Syntax.AST
 
+import Test.Tasty
 import Tests.Common
 
 testSwitch1 = testParse "test switch with empty case"
@@ -166,7 +167,8 @@ testIf6 = testParse "if stmt with composite lieral as index"
       (GoBlock [GoStmtContinue Nothing]) Nothing
   where elem t = GoElement GoKeyNone $ GoValueExpr $ ident t
 
-testsParseStmts =
+testsParseStmts :: TestTree
+testsParseStmts = testGroup "parse statements"
   [ testSwitch1
   , testSwitch2
   , testSwitch3

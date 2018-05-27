@@ -7,7 +7,8 @@
 
 module Tests.Lexer (testsLexer) where
 
-import Test.HUnit
+import Test.Tasty
+import Test.Tasty.HUnit
 
 import Language.Go.Parser.Lexer
 import Language.Go.Parser.Tokens (
@@ -16,8 +17,8 @@ import Language.Go.Parser.Tokens (
  , insertSemi
  )
 
-testLex :: String -> String -> [GoToken] -> Test
-testLex desc text ref = TestLabel desc $ TestCase $ assertEqual desc ref toks
+testLex :: String -> String -> [GoToken] -> TestTree
+testLex desc text ref = testCase desc $ assertEqual desc ref toks
   where toks = map strip $ insertSemi $ alexScanTokens text
         strip (GoTokenPos _ tok) = tok
 
@@ -118,7 +119,8 @@ testComment4 = testLex "comment with many stars"
   "/******\n ******/"
   [ GoTokComment True "*****\n *****" ]
 
-testsLexer =
+testsLexer :: TestTree
+testsLexer = testGroup "lexer tests"
   [ testRawString1
   , testRawString2
   , testCharLit1

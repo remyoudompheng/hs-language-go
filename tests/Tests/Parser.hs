@@ -11,13 +11,8 @@ module Tests.Parser (testsParser) where
 import Language.Go.Parser.Parser
 import Language.Go.Syntax.AST
 
+import Test.Tasty
 import Tests.Common
-
--- begin debug
--- import Debug.Trace
--- import Text.Parsec.Prim
--- import Control.Monad
--- import Language.Go.Parser.Operators
 
 testImport1 = testParse "dot import"
     goImportDecl "import . \"os\"" $
@@ -170,7 +165,8 @@ testFuncType2 = testParse "variadic func type without arg names"
       , GoParam [] (GoVariadicType $ namedType "U")
       ] [])
 
-testsParser =
+testsParser :: TestTree
+testsParser = testGroup "parser"
   [ testImport1
   , testConst1
   , testConst2
