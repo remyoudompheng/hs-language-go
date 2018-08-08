@@ -12,6 +12,7 @@ module Language.Go.Pretty (
 
 -- TODO: tabwriter-like alignment of fields.
 
+import Prelude hiding ((<>))
 import Data.List
 import Data.Maybe (isJust)
 import Text.PrettyPrint
